@@ -90,6 +90,7 @@ dependencies {
     implementation(libs.bundles.room)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.androidx.navigation.compose)
+    implementation("io.coil-kt.coil3:coil-compose:3.3.0")
 //    implementation(libs.androidx.glance)
 //    implementation(libs.androidx.glance.appwidget)
 //    implementation(libs.androidx.glance.material3)

@@ -5,6 +5,8 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.ui.Modifier
 import app.what.investtravel.data.local.settings.AppValues
 import app.what.investtravel.features.main.navigation.MainProvider
 import app.what.investtravel.features.main.navigation.mainRegistry
@@ -33,7 +35,7 @@ class MainActivity : ComponentActivity() {
             AppTheme(settings) {
                 ProvideGlobalDialog {
                     ProvideGlobalSheet {
-                        NavigationHost(
+                        NavigationHost(modifier = Modifier.statusBarsPadding(),
                             start = if (settings.isFirstLaunch.get()!!) OnboardingProvider
                             else MainProvider
                         ) {

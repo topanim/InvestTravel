@@ -2,6 +2,8 @@ package app.what.investtravel.features.someFeature
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
@@ -9,6 +11,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import app.what.foundation.services.AppLogger.Companion.Auditor
+import app.what.foundation.ui.controllers.rememberSheetController
+import app.what.investtravel.ui.components.PlaceCard
 import app.what.investtravel.ui.components.YandexMapKit
 import com.yandex.mapkit.RequestPoint
 import com.yandex.mapkit.RequestPointType
@@ -71,6 +75,7 @@ class Some(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SomeFeature() = Column {
     val navigationPoints = remember { mutableStateListOf<Point>() }
@@ -88,4 +93,15 @@ fun SomeFeature() = Column {
         modifier = Modifier
             .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)),
     ) { _, point -> true }
+
+    val controller = rememberSheetController()
+
+    controller.open(){
+        PlaceCard("https://tobolinfo.kz/wp-content/uploads/2019/06/IMG_20190526_161606-1500x2000.jpg",
+            "Туалет",
+            "Туалет",
+            false
+        )
+    }
+
 }
