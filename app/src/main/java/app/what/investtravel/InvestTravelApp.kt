@@ -13,6 +13,7 @@ import app.what.investtravel.features.settings.domain.SettingsController
 import app.what.investtravel.libs.FileManager
 import app.what.investtravel.libs.GoogleDriveParser
 import app.what.investtravel.utils.AppUtils
+import com.yandex.mapkit.MapKitFactory
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -31,6 +32,7 @@ class InvestTravelApp : Application() {
         super.onCreate()
 
         MapKitFactory.setApiKey("56a9a2d2-2738-4544-9bdf-2f323b59ec6a")
+        MapKitFactory.initialize(applicationContext)
         CrashHandler.initialize(applicationContext)
         AppLogger.initialize(applicationContext)
         Auditor.info("core", "App started")
