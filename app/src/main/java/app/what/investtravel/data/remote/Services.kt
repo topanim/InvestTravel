@@ -328,6 +328,7 @@ class AiService(
         return apiClient.safeRequest {
             post("ai/ai/generate-comment") {
                 parameter("token", appValues.authToken.get())
+                contentType(ContentType.Application.Json)
                 setBody(data)
             }.body()
         }
