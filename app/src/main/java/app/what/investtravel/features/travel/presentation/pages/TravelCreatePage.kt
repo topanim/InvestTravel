@@ -70,6 +70,7 @@ import com.google.android.gms.location.LocationServices
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
+import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 import kotlin.math.roundToInt
@@ -306,14 +307,7 @@ private fun SelectDate(title: String, selectDate: (String) -> Unit) {
             onDismissRequest = { showPicker = false },
             confirmButton = {
                 TextButton(onClick = {
-                    val formatter = DateTimeFormatter.ofPattern("dd.MM.yy")
-                        .withZone(ZoneId.systemDefault())
-                    val date = formatter.format(
-                        Instant.ofEpochMilli(
-                            datePickerState.selectedDateMillis ?: 0L
-                        )
-                    )
-                    selectDate(date)
+                    selectDate(millisToIso8601(datePickerState.selectedDateMillis ?: 0L))
                     showPicker = false
                 }) {
                     Text("OK")
@@ -404,6 +398,13 @@ fun getLocation(
         }
     }
 }
+fun millisToIso8601(millis: Long): String {
+    val instant = Instant.ofEpochMilli(millis)
+    return DateTimeFormatter
+        .ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+        .withZone(ZoneOffset.UTC)
+        .format(instant)
+}
 
 
 
@@ -470,6 +471,12 @@ private fun SliderField(
     }
 
 }
+fun isoToShortDate(isoString: String): String {
+    val instant = Instant.parse(isoString) // парсим ISO 8601
+    val formatter = DateTimeFormatter.ofPattern("dd.MM.yy")
+        .withZone(ZoneId.systemDefault()) // локальная зона
+    return formatter.format(instant)
+}
 
 @Composable
 fun ShowResultCard(
@@ -500,9 +507,14 @@ fun ShowResultCard(
         ) {
             Column(modifier = Modifier.padding(10.dp),
                 horizontalAlignment = Alignment.Start) {
+
                 Text("Состав маршрута :", fontSize = 30.sp)
-                TextForCard("Время начала", value = startTime)
-                TextForCard("Время конца", value = endTime)
+                if(startTime.isNotBlank()) {
+                    TextForCard("Время начала", value = isoToShortDate(startTime))
+                }
+                if(endTime.isNotBlank()) {
+                    TextForCard("Время конца", value = isoToShortDate(endTime))
+                }
                 TextForCard("Время еды", value = foodTime.toInt().toString())
                 TextForCard("Рестораны", value = restaurant.toInt().toString())
                 TextForCard("Время на перекус", value = fastFoodTime.toInt().toString())

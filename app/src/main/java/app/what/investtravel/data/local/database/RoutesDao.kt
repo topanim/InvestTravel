@@ -3,13 +3,20 @@ package app.what.investtravel.data.local.database
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
+import androidx.room.Query
+import androidx.room.Transaction
 import app.what.investtravel.data.local.entity.RouteEntity
+import app.what.investtravel.data.local.entity.RouteWithPoints
 
 
 @Dao
 interface RoutesDAO {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insert(teacher: RouteEntity)
+
+    @Transaction
+    @Query("SELECT * FROM routes WHERE routes.id = :id")
+    suspend fun selectRouteById(id: Int): RouteWithPoints
 }
 
 //    @Insert(onConflict = OnConflictStrategy.IGNORE)

@@ -26,7 +26,7 @@ data class HotelResponse(
     @SerialName("email") val email: String? = null,
     @SerialName("website") val website: String? = null,
     @SerialName("stars") val stars: Int = 3,
-    @SerialName("price_per_night") val pricePerNight: Double,
+    @SerialName("price_per_night") val pricePerNight: Int,
     @SerialName("currency") val currency: String = "RUB",
     @SerialName("amenities") val amenities: List<String>? = null,
     @SerialName("images") val images: List<String>? = null,
@@ -281,4 +281,15 @@ data class ValidationError(
     @SerialName("loc") val location: List<String>, // TODO: List<Any>
     @SerialName("msg") val message: String,
     @SerialName("type") val type: String
+)
+@Serializable
+data class GenerateCommentRequest(
+    @SerialName("meeting_title") val routeId: String,
+    @SerialName("meeting_text") val comment: String
+)
+@Serializable
+data class GenerateCommentResponse(
+    @SerialName("comment") val comment: String,
+    @SerialName("meeting_title") val meetingTitle: String,
+    @SerialName("success") val success: Boolean,
 )

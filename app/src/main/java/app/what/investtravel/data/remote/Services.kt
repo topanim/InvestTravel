@@ -320,3 +320,17 @@ class RoutesService(
         }
     }
 }
+class AiService(
+    private val apiClient: ApiClient,
+    private val appValues: AppValues
+) {
+    suspend fun generateComment(data: GenerateCommentRequest): Result<GenerateCommentResponse>{
+        return apiClient.safeRequest {
+            post("ai/ai/generate-comment") {
+                parameter("token", appValues.authToken.get())
+                contentType(ContentType.Application.Json)
+                setBody(data)
+            }.body()
+        }
+    }
+}

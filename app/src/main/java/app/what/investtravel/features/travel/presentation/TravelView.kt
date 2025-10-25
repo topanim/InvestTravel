@@ -472,7 +472,7 @@ fun TravelSheet(
         ) { page ->
             when (page) {
                 0 -> TravelsPage(state, listener)
-                1 -> if(newTravel) TravelCreatePage(){
+                1 -> if(newTravel) TravelCreatePage{
                     listener.invoke(TravelEvent.SaveTravel(it))
                 } else TravelDetailPage(state)
             }
@@ -482,6 +482,7 @@ fun TravelSheet(
             Button(
                 onClick = {
                     scope.launch {
+                        pagerState.animateScrollToPage(0)
                         listener(TravelEvent.TravelUnselected)
                         newTravel = false
                     }
