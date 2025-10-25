@@ -1,6 +1,7 @@
 package app.what.investtravel.ui.components
 
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.OutlinedTextField
@@ -24,11 +25,11 @@ fun SearchTextField(
     modifier: Modifier = Modifier,
     debounce: Long = 0,
     placeholder: String? = null,
+    actions: KeyboardActions = KeyboardActions.Default,
     leading: (@Composable () -> Unit)? = null,
     trailing: (@Composable () -> Unit)? = null,
 ) {
     val (text, setText) = useState(value)
-    var enabled by useState(false)
 
     LaunchedEffect(text) {
         delay(debounce)
@@ -36,12 +37,10 @@ fun SearchTextField(
     }
 
     OutlinedTextField(
-        enabled = enabled,
-        modifier = modifier
-            .clip(CircleShape)
-            .bclick { enabled = true },
+        modifier = modifier.clip(CircleShape),
         value = text,
         onValueChange = setText,
+        keyboardActions = actions,
         placeholder = placeholder?.let {
             {
                 Text(

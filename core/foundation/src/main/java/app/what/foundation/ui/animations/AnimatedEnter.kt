@@ -3,7 +3,9 @@ package app.what.foundation.ui.animations
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -37,13 +39,14 @@ fun AnimatedEnter(
     duration: Int = 500,
     content: @Composable () -> Unit
 ) {
-
-
     AnimatedVisibility(
         modifier = modifier,
         visible = visible,
         enter = fadeIn(tween(duration)) + slideInVertically(
             initialOffsetY = { it / 2 },
+            animationSpec = tween(duration)
+        ),
+        exit = fadeOut(tween(duration)) + slideOutVertically(
             animationSpec = tween(duration)
         )
     ) {

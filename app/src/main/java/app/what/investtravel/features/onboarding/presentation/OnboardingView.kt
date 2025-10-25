@@ -13,22 +13,13 @@ import app.what.foundation.core.Listener
 import app.what.foundation.ui.keyboardAsState
 import app.what.investtravel.features.onboarding.domain.models.OnboardingEvent
 import app.what.investtravel.features.onboarding.domain.models.OnboardingState
+import app.what.investtravel.features.profile.domain.models.ProfileEvent
+import app.what.investtravel.features.profile.domain.models.ProfileState
 
 @Composable
 fun OnboardingView(
     state: OnboardingState,
     listener: Listener<OnboardingEvent>
-) = Column(
-    modifier = Modifier
-        .fillMaxSize()
-        .background(colorScheme.background)
 ) {
-    val keyboardState by keyboardAsState()
-    Button(
-        onClick = {
-            listener(OnboardingEvent.FinishClicked)
-        }
-    ) {
-        Text("Завершить онбоардинг")
-    }
+
 }

@@ -6,10 +6,17 @@ import app.what.foundation.services.AppLogger.Companion.Auditor
 import app.what.foundation.services.auto_update.GitHubUpdateService
 import app.what.foundation.services.crash.CrashHandler
 import app.what.investtravel.data.local.settings.AppValues
+import app.what.investtravel.data.remote.ApiClient
+import app.what.investtravel.data.remote.AuthService
+import app.what.investtravel.data.remote.RoutesService
+import app.what.investtravel.data.remote.UsersService
+import app.what.investtravel.features.assistant.domain.AssistantController
 import app.what.investtravel.features.dev.presentation.NetworkMonitorPlugin
 import app.what.investtravel.features.main.domain.MainController
 import app.what.investtravel.features.onboarding.domain.OnboardingController
+import app.what.investtravel.features.profile.domain.ProfileController
 import app.what.investtravel.features.settings.domain.SettingsController
+import app.what.investtravel.features.travel.domain.TravelController
 import app.what.investtravel.libs.FileManager
 import app.what.investtravel.libs.GoogleDriveParser
 import app.what.investtravel.utils.AppUtils
@@ -50,6 +57,16 @@ val generalModule = module {
     single { GoogleDriveParser(get()) }
     single { FileManager(get()) }
     single { GitHubUpdateService(get()) }
+
+    single { ApiClient(get(), get()) }
+    single { AuthService(get()) }
+    single { UsersService(get()) }
+    single { RoutesService(get()) }
+
+
+    single<ProfileController> { ProfileController(get()) }
+    single<AssistantController> { AssistantController() }
+    single<TravelController> { TravelController() }
     single<SettingsController> { SettingsController(get(), get()) }
     single<OnboardingController> { OnboardingController(get()) }
     single<MainController> { MainController() }
