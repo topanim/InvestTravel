@@ -5,10 +5,9 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import app.what.investtravel.data.local.entity.RouteEntity
 import app.what.investtravel.data.local.entity.RoutePointEntity
-import app.what.investtravel.data.local.entity.RouteWithPoints
 
 @Database(
-    entities = [RouteEntity::class, RoutePointEntity::class, RouteWithPoints::class],
+    entities = [RouteEntity::class, RoutePointEntity::class],
     version = 1
 )
 @TypeConverters(Converters::class)

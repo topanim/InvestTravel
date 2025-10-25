@@ -9,5 +9,5 @@ import app.what.investtravel.data.local.entity.RoutePointEntity
 @Dao
 interface PointsDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun insert(teacher:List<RoutePointEntity>): Long
+    suspend fun insert(teacher:List<RoutePointEntity>)
 }

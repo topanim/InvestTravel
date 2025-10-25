@@ -9,7 +9,8 @@ import app.what.investtravel.data.local.entity.RouteEntity
 @Dao
 interface RoutesDAO {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun insert(teacher: RouteEntity): Long}
+    suspend fun insert(teacher: RouteEntity)
+}
 
 //    @Insert(onConflict = OnConflictStrategy.IGNORE)
 //    suspend fun insert(teacher: List<TeacherDBO>)

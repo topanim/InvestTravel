@@ -9,39 +9,41 @@ import androidx.room.Relation
 data class RouteEntity(
     @PrimaryKey(autoGenerate = true) val localId: Int = 0,
     val id: Int,
-    val name: String?,
-    val description: String?,
-    val startDate: String?,
-    val endDate: String?,
-    val totalDurationHours: Int?,
-    val totalDistanceKm: Int?,
-    val totalObjects: Int?,
-    val categoriesCovered: String?, // Сохраняем как JSON-строку
-    val routeSummary: String? = null // тоже как JSON
+    val name: String? = null,
+    val description: String? = null,
+    val startDate: String? = null,
+    val endDate: String? = null,
+    val totalDurationHours: Int = 0,
+    val totalDistanceKm: Int = 0,
+    val totalObjects: Int = 0,
+    val categoriesCovered: String? = null, // JSON
+    val routeSummary: String? = null // JSON
 )
+
 @Entity(tableName = "route_points")
 data class RoutePointEntity(
     @PrimaryKey(autoGenerate = true) val localId: Int = 0,
-    val routeId: Int?, // внешний ключ на RouteEntity.id
-    val order: Int?,
-    val name: String?,
-    val category: String?,
-    val subcategory: String?,
-    val latitude: Double?,
-    val longitude: Double?,
-    val address: String?,
-    val arrivalTime: String?,
-    val departureTime: String?,
-    val durationMinutes: Int?,
-    val travelTimeMinutes: Int?,
-    val description: String?,
-    val distanceToNextKm: Int?
+    val routeId: Int, // связываем с RouteEntity.localId
+    val order: Int = 0,
+    val name: String? = null,
+    val category: String? = null,
+    val subcategory: String? = null,
+    val latitude: Double = 0.0,
+    val longitude: Double = 0.0,
+    val address: String? = null,
+    val arrivalTime: String? = null,
+    val departureTime: String? = null,
+    val durationMinutes: Int = 0,
+    val travelTimeMinutes: Int? = 0,
+    val description: String? = null,
+    val distanceToNextKm: Int = 0
 )
+
 data class RouteWithPoints(
     @Embedded val route: RouteEntity,
     @Relation(
-        parentColumn = "id",
-        entityColumn = "routeId"
+        parentColumn = "localId", // PK таблицы RouteEntity
+        entityColumn = "routeId"  // FK в RoutePointEntity
     )
     val points: List<RoutePointEntity>
 )
