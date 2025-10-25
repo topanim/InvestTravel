@@ -10,6 +10,10 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -21,8 +25,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
@@ -30,15 +37,22 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Label
 import androidx.compose.material3.MaterialTheme.colorScheme
+import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
@@ -57,9 +71,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -77,11 +90,12 @@ import kotlin.math.roundToInt
 
 @Composable
 fun TravelCreatePage(
-    saveTravel: (UserPreferences) -> Unit
+    onSaveTravel: (UserPreferences) -> Unit
 ) {
     BackHandler {
 
     }
+    val context = LocalContext.current
     val startTime = remember { mutableStateOf<String>("") }
     val endTime = remember { mutableStateOf<String>("") }
     val foodTime = remember { mutableStateOf(0f) }
@@ -103,86 +117,132 @@ fun TravelCreatePage(
     val avoidNightTime = remember { mutableStateOf<Boolean?>(null) }
     val requireFoodPoints = remember { mutableStateOf<Boolean?>(null) }
     val address = remember { mutableStateOf<String?>(null) }
-    val context = LocalContext.current
+    
     LaunchedEffect(startLatitude.value) {
         address.value = getAddressFromCoordinates(context, startLatitude.value, startLongitude.value)
     }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 16.dp)
-            .verticalScroll(rememberScrollState()),
-        verticalArrangement = Arrangement.SpaceAround
+            .verticalScroll(rememberScrollState())
+            .background(colorScheme.background),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        FlowRow(
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
-            modifier = Modifier
-
-        ) {
-            SelectDate("Время начала") {
-                startTime.value = it
+        // Шапка
+        Text(
+            text = "Создание маршрута",
+            style = typography.headlineMedium,
+            fontWeight = FontWeight.Bold,
+            color = colorScheme.primary,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+        )
+        
+        // Даты
+        SectionCard(title = "Даты путешествия") {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    SelectDate("Время начала") { startTime.value = it }
+                }
+                Column(modifier = Modifier.weight(1f)) {
+                    SelectDate("Время конца") { endTime.value = it }
+                }
             }
-            SelectDate("Время конца") {
-                endTime.value = it
-            }
-            SliderField("Время еды", foodTime.value) {
-                foodTime.value = it
-            }
-            SliderField("Рестораны", restaurant.value) {
-                restaurant.value = it
-            }
-            SliderField("Фаст фуд", foodTime.value) {
-                fastFoodTime.value = it
-            }
-            SliderField("Времени до кафе", cafeTime.value) {
-                cafeTime.value = it
-            }
-            SliderField("Времени до бара", barTime.value) {
-                barTime.value = it
-            }
-            SliderField("Время путешевствия", tourismTime.value) {
-                tourismTime.value = it
-            }
-            SliderField("Путешевствие", tourism.value) {
-                tourism.value = it
-            }
-            SliderField("Время на искусство", artTime.value) {
-                artTime.value = it
-            }
-            SliderField("Искусство", art.value) {
-                art.value = it
-            }
-            SliderField("Время на досуг", leisureTime.value) {
-                leisureTime.value = it
-            }
-            SliderField("Время на шоппинг", shoppingTime.value) {
-                shoppingTime.value = it
-            }
-            SliderField("Приёмов пищи в день", mealsPerDay.value) {
-                mealsPerDay.value = it
-            }
-            SliderField("максимальная дистанция", mealsPerDay.value) {
-                maxDistanceKm.value = it
-            }
-            QuestionCheckBox("Рядом", preferNearby.value) {
-                preferNearby.value = it
-            }
-            QuestionCheckBox("Избегать ночи", avoidNightTime.value) {
-                avoidNightTime.value = it
-            }
-            QuestionCheckBox("Места для еды", requireFoodPoints.value) {
-                requireFoodPoints.value = it
-            }
-            MyPlaceRequest(startLatitude.value,startLongitude.value) { lat,lon ->
+        }
+        
+        // Местоположение
+        SectionCard(title = "Местоположение") {
+            MyPlaceRequest(startLatitude.value, startLongitude.value) { lat, lon ->
                 startLatitude.value = lat
                 startLongitude.value = lon
             }
+            if (address.value != null) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(
+                            colorScheme.primaryContainer.copy(alpha = 0.3f),
+                            shape = RoundedCornerShape(8.dp)
+                        )
+                        .padding(12.dp)
+                ) {
+                    Icon(
+                        Icons.Filled.LocationOn,
+                        contentDescription = null,
+                        tint = colorScheme.primary,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = address.value ?: "",
+                        style = typography.bodyMedium,
+                        color = colorScheme.onSurface
+                    )
+                }
+            }
         }
-        Spacer(modifier = Modifier.weight(1f))
-        this.AnimatedVisibility(
-            startTime.value.isNotBlank() || endTime.value.isNotBlank() || foodTime.value > 0 || restaurant.value > 0 || fastFoodTime.value > 0 || cafeTime.value > 0 || barTime.value > 0 || tourismTime.value > 0 || tourism.value > 0 || artTime.value > 0 || art.value > 0 || leisureTime.value > 0 || shoppingTime.value > 0 || mealsPerDay.value > 0 || maxDistanceKm.value > 0 || preferNearby.value != null || avoidNightTime.value != null || requireFoodPoints.value != null || startLatitude.value != 0.0 || startLongitude.value != 0.0
+        
+        // Питание
+        SectionCard(title = "Питание") {
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                SliderField("Время еды", foodTime.value) { foodTime.value = it }
+                SliderField("Рестораны", restaurant.value) { restaurant.value = it }
+                SliderField("Фаст-фуд", fastFoodTime.value) { fastFoodTime.value = it }
+                SliderField("Время в кафе", cafeTime.value) { cafeTime.value = it }
+                SliderField("Время в барах", barTime.value) { barTime.value = it }
+            }
+        }
+        
+        // Туризм
+        SectionCard(title = "Туризм") {
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                SliderField("Время на туризм", tourismTime.value) { tourismTime.value = it }
+                SliderField("Туризм", tourism.value) { tourism.value = it }
+            }
+        }
+        
+        // Культура и досуг
+        SectionCard(title = "Культура и досуг") {
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                SliderField("Время на искусство", artTime.value) { artTime.value = it }
+                SliderField("Искусство", art.value) { art.value = it }
+                SliderField("Время на досуг", leisureTime.value) { leisureTime.value = it }
+                SliderField("Время на шоппинг", shoppingTime.value) { shoppingTime.value = it }
+            }
+        }
+        
+        // Дополнительные настройки
+        SectionCard(title = "Дополнительные настройки") {
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                SliderField("Приёмов пищи в день", mealsPerDay.value) { mealsPerDay.value = it }
+                SliderField("Максимальная дистанция", maxDistanceKm.value) { maxDistanceKm.value = it }
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                QuestionCheckBox("Рядом", preferNearby.value) { preferNearby.value = it }
+                QuestionCheckBox("Избегать ночи", avoidNightTime.value) { avoidNightTime.value = it }
+                QuestionCheckBox("Места для еды", requireFoodPoints.value) { requireFoodPoints.value = it }
+            }
+        }
+        
+        // Предпросмотр и кнопка создания
+        AnimatedVisibility(
+            visible = hasAnyValue(startTime, endTime, foodTime, restaurant, fastFoodTime, 
+                cafeTime, barTime, tourismTime, tourism, artTime, art, leisureTime, 
+                shoppingTime, mealsPerDay, maxDistanceKm, preferNearby, avoidNightTime, 
+                requireFoodPoints, startLatitude, startLongitude),
+            enter = fadeIn() + expandVertically(),
+            exit = fadeOut() + shrinkVertically()
         ) {
-            Column {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
                 ShowResultCard(
                     startTime.value,
                     endTime.value,
@@ -202,13 +262,12 @@ fun TravelCreatePage(
                     maxDistanceKm.value,
                     preferNearby.value,
                     avoidNightTime.value,
-                    requireFoodPoints.value,
-
-
-                    )
+                    requireFoodPoints.value
+                )
+                
                 Button(
-                    {
-                        saveTravel(
+                    onClick = {
+                        onSaveTravel(
                             UserPreferences(
                                 startDate = startTime.value,
                                 endDate = endTime.value,
@@ -230,13 +289,29 @@ fun TravelCreatePage(
                                 requireFoodPoints = requireFoodPoints.value ?: false,
                                 startLatitude = startLatitude.value,
                                 startLongitude = startLongitude.value
-
                             )
                         )
-                    }, modifier = Modifier.fillMaxWidth(),
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = colorScheme.primary,
+                        contentColor = colorScheme.onPrimary
+                    ),
                     shape = RoundedCornerShape(16.dp)
                 ) {
-                    Text("Создать марштрут")
+                    Icon(
+                        Icons.Filled.CheckCircle,
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Создать маршрут",
+                        style = typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
                 }
             }
         }
@@ -372,21 +447,6 @@ fun Geocoder.getCity(lat: Double, lon: Double): String? {
     }
 }
 
-fun getAddressFromCoordinates(context: Context, latitude: Double, longitude: Double): String? {
-    return try {
-        val geocoder = Geocoder(context, Locale.getDefault())
-        val addresses = geocoder.getFromLocation(latitude, longitude, 1)
-        if (addresses != null && addresses.isNotEmpty()) {
-            val address = addresses[0]
-            // Формируем строку, например: "улица, город, страна"
-            listOfNotNull(address.thoroughfare,address.subThoroughfare, address.locality, address.countryName)
-                .joinToString(", ")
-        } else null
-    } catch (e: Exception) {
-        e.printStackTrace()
-        null
-    }
-}
 @SuppressLint("MissingPermission")
 fun getLocation(
     fusedLocationClient: FusedLocationProviderClient,
@@ -458,7 +518,7 @@ private fun SliderField(
                                 .background(colorScheme.secondary)
                         ) {
                             Icon(
-                                imageVector = ImageVector.vectorResource(R.drawable.baseline_directions_run_24),
+                                imageVector = Icons.Filled.LocationOn,
                                 contentDescription = null,
                                 tint = Color.White,
                             )
@@ -565,14 +625,103 @@ data class UserPreferences(
 @Composable
 fun TextForCard(title: String, value: String) {
     if (value.isNotBlank() && value != "0" && value != "null") {
-        val value = when (value) {
+        val displayValue = when (value) {
             "true" -> "Да"
             "false" -> "Нет"
             else -> value
         }
-        Text("$title - $value")
+        Text("$title - $displayValue")
+    }
+}
 
+@Composable
+fun SectionCard(
+    title: String,
+    content: @Composable () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        colors = CardDefaults.cardColors(containerColor = colorScheme.surface)
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Text(
+                text = title,
+                style = typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = colorScheme.primary
+            )
+            Divider()
+            content()
+        }
+    }
+}
 
+fun hasAnyValue(
+    startTime: androidx.compose.runtime.MutableState<String>,
+    endTime: androidx.compose.runtime.MutableState<String>,
+    foodTime: androidx.compose.runtime.MutableState<Float>,
+    restaurant: androidx.compose.runtime.MutableState<Float>,
+    fastFoodTime: androidx.compose.runtime.MutableState<Float>,
+    cafeTime: androidx.compose.runtime.MutableState<Float>,
+    barTime: androidx.compose.runtime.MutableState<Float>,
+    tourismTime: androidx.compose.runtime.MutableState<Float>,
+    tourism: androidx.compose.runtime.MutableState<Float>,
+    artTime: androidx.compose.runtime.MutableState<Float>,
+    art: androidx.compose.runtime.MutableState<Float>,
+    leisureTime: androidx.compose.runtime.MutableState<Float>,
+    shoppingTime: androidx.compose.runtime.MutableState<Float>,
+    mealsPerDay: androidx.compose.runtime.MutableState<Float>,
+    maxDistanceKm: androidx.compose.runtime.MutableState<Float>,
+    preferNearby: androidx.compose.runtime.MutableState<Boolean?>,
+    avoidNightTime: androidx.compose.runtime.MutableState<Boolean?>,
+    requireFoodPoints: androidx.compose.runtime.MutableState<Boolean?>,
+    startLatitude: androidx.compose.runtime.MutableState<Double>,
+    startLongitude: androidx.compose.runtime.MutableState<Double>
+): Boolean {
+    return startTime.value.isNotBlank() || 
+           endTime.value.isNotBlank() || 
+           foodTime.value > 0 || 
+           restaurant.value > 0 || 
+           fastFoodTime.value > 0 || 
+           cafeTime.value > 0 || 
+           barTime.value > 0 || 
+           tourismTime.value > 0 || 
+           tourism.value > 0 || 
+           artTime.value > 0 || 
+           art.value > 0 || 
+           leisureTime.value > 0 || 
+           shoppingTime.value > 0 || 
+           mealsPerDay.value > 0 || 
+           maxDistanceKm.value > 0 || 
+           preferNearby.value != null || 
+           avoidNightTime.value != null || 
+           requireFoodPoints.value != null || 
+           startLatitude.value != 0.0 || 
+           startLongitude.value != 0.0
+}
+
+fun getAddressFromCoordinates(context: Context, latitude: Double, longitude: Double): String? {
+    return try {
+        val geocoder = Geocoder(context, Locale.getDefault())
+        val addresses = geocoder.getFromLocation(latitude, longitude, 1)
+        if (addresses != null && addresses.isNotEmpty()) {
+            val address = addresses[0]
+            listOfNotNull(
+                address.thoroughfare,
+                address.subThoroughfare,
+                address.locality,
+                address.countryName
+            ).joinToString(", ")
+        } else null
+    } catch (e: Exception) {
+        e.printStackTrace()
+        null
     }
 }
 

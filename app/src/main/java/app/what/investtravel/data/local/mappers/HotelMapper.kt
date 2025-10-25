@@ -18,7 +18,7 @@ fun HotelResponse.toEntity(): HotelEntity {
         email = this.email,
         amenities = this.amenities?.let { Json.encodeToString(it) },
         images = this.images?.let { Json.encodeToString(it) },
-        status = this.status.name,
+        status = this.status,
         createdAt = this.createdAt,
         updatedAt = this.updatedAt,
         currency = this.currency,

@@ -17,7 +17,7 @@ import com.google.android.gms.location.FusedLocationProviderClient
 
 class HotelController(
     private val hotelService: HotelsService,
-    private val settings: AppValues,
+    settings: AppValues,
     private val geocoder: Geocoder,
     val fusedLocationClient: FusedLocationProviderClient
 ) : UIController<HotelState, HotelAction, HotelEvent>(
@@ -29,6 +29,10 @@ class HotelController(
 
     override fun obtainEvent(viewEvent: HotelEvent) = when (viewEvent) {
         HotelEvent.Init -> fetchHotels()
+        is HotelEvent.HotelSelected -> {}
+        HotelEvent.LoadNextPage -> {}
+        HotelEvent.Refresh -> fetchHotels()
+        is HotelEvent.UpdateFilters -> updateState { copy(filters = viewEvent.filters) }
     }
 
     fun fetchHotels() {

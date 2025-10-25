@@ -29,6 +29,7 @@ import com.google.android.gms.location.LocationServices
 import com.yandex.mapkit.MapKitFactory
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
+import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.logging.Logger
 import io.ktor.client.plugins.logging.Logging
@@ -91,6 +92,9 @@ val generalModule = module {
 
     single {
         HttpClient(CIO) {
+            install(HttpTimeout) {
+                requestTimeoutMillis = 60000
+            }
             install(NetworkMonitorPlugin)
 
             install(Logging) {

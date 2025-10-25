@@ -15,7 +15,7 @@ data class HotelEntity(
     val email: String? = null,
     val website: String? = null,
     val stars: Int? = null,
-    val pricePerNight: Int? = null,
+    val pricePerNight: Float? = null,
     val currency: String? = null,
     val amenities: String? = null,
     val images: String? = null,

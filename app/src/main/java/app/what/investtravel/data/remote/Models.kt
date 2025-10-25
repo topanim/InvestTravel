@@ -26,7 +26,7 @@ data class HotelResponse(
     @SerialName("email") val email: String? = null,
     @SerialName("website") val website: String? = null,
     @SerialName("stars") val stars: Int = 3,
-    @SerialName("price_per_night") val pricePerNight: Int,
+    @SerialName("price_per_night") val pricePerNight: Float,
     @SerialName("currency") val currency: String = "RUB",
     @SerialName("amenities") val amenities: List<String>? = null,
     @SerialName("images") val images: List<String>? = null,

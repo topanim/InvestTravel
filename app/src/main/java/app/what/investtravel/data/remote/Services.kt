@@ -39,6 +39,7 @@ class HotelsService(
                 checkIn?.let { parameter("check_in", it) }
                 checkOut?.let { parameter("check_out", it) }
                 parameter("guests", guests)
+                parameter("auto_sync", false)
                 parameter("rooms", rooms)
                 minPrice?.let { parameter("min_price", it) }
                 maxPrice?.let { parameter("max_price", it) }
