@@ -91,6 +91,7 @@ dependencies {
     implementation(libs.bundles.coil)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.androidx.navigation.compose)
+    implementation("androidx.paging:paging-compose:3.4.0-alpha04")
 //    implementation(libs.androidx.glance)
 //    implementation(libs.androidx.glance.appwidget)
 //    implementation(libs.androidx.glance.material3)

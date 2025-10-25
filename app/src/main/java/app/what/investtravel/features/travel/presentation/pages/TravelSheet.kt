@@ -126,7 +126,7 @@ fun TravelSheet(
                             pagerState.animateScrollToPage(0)
                         }
                     }
-                ) else TravelDetailPage(state)
+                ) else TravelDetailPage(state,listener)
             }
         }
 
@@ -180,7 +180,8 @@ fun TravelsPage(
 @SuppressLint("DefaultLocale")
 @Composable
 fun TravelDetailPage(
-    state: State<TravelState>
+    state: State<TravelState>,
+    listener:Listener<TravelEvent>
 ) = LazyColumn(
     modifier = Modifier.fillMaxSize(),
 ) {
@@ -268,7 +269,9 @@ fun TravelDetailPage(
     }
 
     items(state.value.selectedTravel?.objects ?: emptyList()) { travelObject ->
-        TravelObjectItem(travelObject)
+        TravelObjectItem(travelObject){
+            listener.invoke(TravelEvent.SetToAi(travelObject))
+        }
         VerticalGap(8)
     }
 }

@@ -1,10 +1,13 @@
 package app.what.investtravel.features.hotel.domain.models
 
+import androidx.paging.PagingData
 import app.what.foundation.data.RemoteState
 import app.what.investtravel.data.remote.HotelResponse
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
 
 data class HotelState(
-    val hotels: List<HotelResponse> = emptyList(),
+    val hotels: Flow<PagingData<HotelResponse>> = flowOf(PagingData.from(emptyList())),
     val hotelsFetchState: RemoteState = RemoteState.Idle,
     val filters: HotelFilters = HotelFilters(),
     val isLoading: Boolean = false,
@@ -20,6 +23,7 @@ data class HotelFilters(
     val rooms: Int = 1,
     val minPrice: Double? = null,
     val maxPrice: Double? = null,
-    val stars: String? = null
+    val stars: String? = null,
+    val city:String = ""
 )
 

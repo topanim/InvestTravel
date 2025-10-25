@@ -79,6 +79,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
 import app.what.foundation.core.Listener
 import app.what.foundation.ui.bclick
 import app.what.foundation.ui.useState
@@ -103,6 +105,7 @@ fun HotelView(
     val pagerState = rememberPagerState(pageCount = { 2 })
     var showFilters by useState(false)
     var showBookingDialog by useState(false)
+    val hotelsFlow = state.hotels.collectAsLazyPagingItems()
 
     LaunchedEffect(selectedHotel) {
         NavBarController.setVisibility(selectedHotel == null)
@@ -142,6 +145,7 @@ fun HotelView(
             when (page) {
                 0 -> HotelsListScreen(
                     state = state,
+                    hotelsFlow = hotelsFlow,
                     onHotelSelected = { selectedHotel = it },
                     onShowFilters = { showFilters = true },
                     onRefresh = { listener(HotelEvent.Refresh) },
@@ -187,10 +191,11 @@ private fun requestLocationPermission(
 @Composable
 fun HotelsListScreen(
     state: HotelState,
+    hotelsFlow: LazyPagingItems<HotelResponse>,
     onHotelSelected: (HotelResponse) -> Unit,
     onShowFilters: () -> Unit,
     onRefresh: () -> Unit,
-    listener: Listener<HotelEvent>
+    listener: Listener<HotelEvent>,
 ) {
     // Нативный запрос разрешений
     var locationPermissionGranted by useState(false)
@@ -249,7 +254,7 @@ fun HotelsListScreen(
         }
 
         // Индикатор загрузки при первоначальном поиске отелей
-        if (state.hotelsFetchState == app.what.foundation.data.RemoteState.Loading && state.hotels.isEmpty()) {
+        if (state.hotelsFetchState == app.what.foundation.data.RemoteState.Loading) {
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
@@ -281,11 +286,13 @@ fun HotelsListScreen(
                             .background(colorScheme.background),
                         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
                     ) {
-                        items(state.hotels) { hotel ->
-                            HotelCard(
-                                hotel = hotel,
-                                onHotelSelected = onHotelSelected
-                            )
+                        items(hotelsFlow.itemCount) { index ->
+                            hotelsFlow[index]?.let {
+                                HotelCard(
+                                    hotel = it,
+                                    onHotelSelected = onHotelSelected
+                                )
+                            }
                             Spacer(modifier = Modifier.height(12.dp))
                         }
 

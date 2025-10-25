@@ -58,6 +58,7 @@ class TravelController : UIController<TravelState, TravelAction, TravelEvent>(
     }
 
     private fun sendToAi(value: TravelObject){
+        updateState { copy(aiComment = "") }
         updateState { copy(showSheet = true) }
         viewModelScope.launch(Dispatchers.IO) {
             aiService.generateComment(GenerateCommentRequest(value.name)).onSuccess {
