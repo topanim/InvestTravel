@@ -35,7 +35,7 @@ class MainActivity : ComponentActivity() {
             AppTheme(settings) {
                 ProvideGlobalDialog {
                     ProvideGlobalSheet {
-                        NavigationHost(modifier = Modifier.statusBarsPadding(),
+                        NavigationHost(
                             start = if (settings.isFirstLaunch.get()!!) OnboardingProvider
                             else MainProvider
                         ) {

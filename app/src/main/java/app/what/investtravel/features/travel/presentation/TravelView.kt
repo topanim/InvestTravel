@@ -480,7 +480,6 @@ fun TravelSheet(
             Button(
                 onClick = {
                     scope.launch {
-                        pagerState.animateScrollToPage(0)
                         listener(TravelEvent.TravelUnselected)
                         newTravel = false
                     }

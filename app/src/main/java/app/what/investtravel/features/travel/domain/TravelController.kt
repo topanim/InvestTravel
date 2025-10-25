@@ -29,11 +29,11 @@ class TravelController : UIController<TravelState, TravelAction, TravelEvent>(
         else -> {}
     }
 
-    fun selectTravel(value: Travel) {
+    private fun selectTravel(value: Travel) {
         updateState { copy(selectedTravel = value) }
     }
 
-    fun fetchTravels() {
+    private fun fetchTravels() {
         suspendCall(viewModelScope) {
             updateState { copy(travelsFetchState = RemoteState.Loading) }
             delay(2000L)
