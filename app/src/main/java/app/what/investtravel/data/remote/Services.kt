@@ -228,7 +228,7 @@ class RoutesService(
         return apiClient.safeRequest {
             post("/routes/generate") {
                 parameter("token", appValues.authToken.get())
-//                contentType(ContentType.Application.Json)
+                contentType(ContentType.Application.Json)
                 setBody(routeRequest)
             }.body()
         }
