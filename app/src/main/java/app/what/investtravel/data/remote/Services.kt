@@ -33,7 +33,7 @@ class HotelsService(
         size: Int = 10
     ): Result<HotelListResponse> {
         return apiClient.safeRequest {
-            get("/hotels/search") {
+            get(ApiClient.BASE_URL + "/hotels/search") {
                 parameter("token", appValues.authToken.get())
                 parameter("city", city)
                 checkIn?.let { parameter("check_in", it) }
@@ -57,7 +57,7 @@ class HotelsService(
         size: Int = 10
     ): Result<HotelListResponse> {
         return apiClient.safeRequest {
-            get("/hotels/city/$city") {
+            get(ApiClient.BASE_URL + "/hotels/city/$city") {
                 parameter("page", page)
                 parameter("size", size)
                 parameter("token", appValues.authToken.get())
@@ -68,7 +68,7 @@ class HotelsService(
     // Get Hotel by ID
     suspend fun getHotelById(hotelId: Int): Result<HotelResponse> {
         return apiClient.safeRequest {
-            get("/hotels/$hotelId") {
+            get(ApiClient.BASE_URL + "/hotels/$hotelId") {
                 parameter("token", appValues.authToken.get())
             }.body()
         }
@@ -77,7 +77,7 @@ class HotelsService(
     // Book Hotel
     suspend fun bookHotel(bookingRequest: HotelBookingRequest): Result<HotelBookingResponse> {
         return apiClient.safeRequest {
-            post("/hotels/book") {
+            post(ApiClient.BASE_URL + "/hotels/book") {
                 parameter("token", appValues.authToken.get())
                 setBody(bookingRequest)
             }.body()
@@ -90,7 +90,7 @@ class HotelsService(
         size: Int = 10
     ): Result<UserBookingsResponse> {
         return apiClient.safeRequest {
-            get("/hotels/bookings/my") {
+            get(ApiClient.BASE_URL + "/hotels/bookings/my") {
                 parameter("token", appValues.authToken.get())
                 parameter("page", page)
                 parameter("size", size)
@@ -101,7 +101,7 @@ class HotelsService(
     // Create Payment
     suspend fun createPayment(paymentRequest: HotelPaymentRequest): Result<HotelPaymentResponse> {
         return apiClient.safeRequest {
-            post("/hotels/payments/create") {
+            post(ApiClient.BASE_URL + "/hotels/payments/create") {
                 parameter("token", appValues.authToken.get())
                 setBody(paymentRequest)
             }.body()
@@ -114,7 +114,7 @@ class HotelsService(
         size: Int = 10
     ): Result<UserPaymentsResponse> {
         return apiClient.safeRequest {
-            get("/hotels/payments/my") {
+            get(ApiClient.BASE_URL + "/hotels/payments/my") {
                 parameter("token", appValues.authToken.get())
                 parameter("page", page)
                 parameter("size", size)
@@ -125,7 +125,7 @@ class HotelsService(
     // Simulate Payment Success (for testing)
     suspend fun simulatePaymentSuccess(paymentId: Int): Result<Map<String, Any>> {
         return apiClient.safeRequest {
-            post("/hotels/payments/$paymentId/simulate-success") {
+            post(ApiClient.BASE_URL + "/hotels/payments/$paymentId/simulate-success") {
                 parameter("token", appValues.authToken.get())
             }.body()
         }
@@ -134,7 +134,7 @@ class HotelsService(
     // Cancel Booking
     suspend fun cancelBooking(bookingId: Int): Result<Map<String, Any>> {
         return apiClient.safeRequest {
-            post("/hotels/bookings/$bookingId/cancel") {
+            post(ApiClient.BASE_URL + "/hotels/bookings/$bookingId/cancel") {
                 parameter("token", appValues.authToken.get())
             }.body()
         }
@@ -143,7 +143,7 @@ class HotelsService(
     // Payment Callback (usually called by payment provider)
     suspend fun paymentCallback(callbackRequest: PaymentCallbackRequest): Result<Map<String, Any>> {
         return apiClient.safeRequest {
-            post("/hotels/payments/callback") {
+            post(ApiClient.BASE_URL + "/hotels/payments/callback") {
                 parameter("token", appValues.authToken.get())
                 setBody(callbackRequest)
             }.body()
@@ -157,7 +157,7 @@ class AuthService(
 ) {
     suspend fun login(loginRequest: LoginRequest): Result<TokenResponse> {
         return apiClient.safeRequest {
-            post("/auth/login/") {
+            post(ApiClient.BASE_URL + "/auth/login/") {
                 parameter("token", appValues.authToken.get())
                 setBody(loginRequest)
             }.body()
@@ -172,7 +172,7 @@ class UsersService(
 ) {
     suspend fun createUser(userCreate: UserCreate): Result<UserCreate> {
         return apiClient.safeRequest {
-            post("/users/") {
+            post(ApiClient.BASE_URL + "/users/") {
                 parameter("token", appValues.authToken.get())
                 setBody(userCreate)
             }.body()
@@ -181,13 +181,13 @@ class UsersService(
 
     suspend fun getUsers(): Result<List<UserGet>> {
         return apiClient.safeRequest {
-            get("/users/").body()
+            get(ApiClient.BASE_URL + "/users/").body()
         }
     }
 
     suspend fun getUser(userId: Int): Result<UserCreate> {
         return apiClient.safeRequest {
-            get("/users/$userId") {
+            get(ApiClient.BASE_URL + "/users/$userId") {
                 parameter("token", appValues.authToken.get())
             }.body()
         }
@@ -195,7 +195,7 @@ class UsersService(
 
     suspend fun updateUser(userId: Int, userCreate: UserCreate): Result<UserCreate> {
         return apiClient.safeRequest {
-            put("/users/$userId") {
+            put(ApiClient.BASE_URL + "/users/$userId") {
                 parameter("token", appValues.authToken.get())
                 setBody(userCreate)
             }.body()
@@ -204,7 +204,7 @@ class UsersService(
 
     suspend fun deleteUser(userId: Int): Result<Unit> {
         return apiClient.safeRequest {
-            delete("/users/$userId") {
+            delete(ApiClient.BASE_URL + "/users/$userId") {
                 parameter("token", appValues.authToken.get())
             }
         }
@@ -212,7 +212,7 @@ class UsersService(
 
     suspend fun getCurrentUser(): Result<UserMoreModel> {
         return apiClient.safeRequest {
-            get("/users/user/me") {
+            get(ApiClient.BASE_URL + "/users/user/me") {
                 parameter("token", appValues.authToken.get())
             }.body()
         }
@@ -226,7 +226,7 @@ class RoutesService(
 ) {
     suspend fun generateRoute(routeRequest: RouteRequest): Result<RouteResponse> {
         return apiClient.safeRequest {
-            post("/routes/generate") {
+            post(ApiClient.BASE_URL + "/routes/generate") {
                 parameter("token", appValues.authToken.get())
                 contentType(ContentType.Application.Json)
                 setBody(routeRequest)
@@ -241,7 +241,7 @@ class RoutesService(
         search: String? = null
     ): Result<List<RouteResponse>> {
         return apiClient.safeRequest {
-            get("/routes/") {
+            get(ApiClient.BASE_URL + "/routes/") {
                 parameter("token", appValues.authToken.get())
                 parameter("skip", skip)
                 parameter("limit", limit)
@@ -253,7 +253,7 @@ class RoutesService(
 
     suspend fun getRoute(routeId: Int): Result<RouteResponse> {
         return apiClient.safeRequest {
-            get("/routes/$routeId") {
+            get(ApiClient.BASE_URL + "/routes/$routeId") {
                 parameter("token", appValues.authToken.get())
             }.body()
         }
@@ -261,7 +261,7 @@ class RoutesService(
 
     suspend fun updateRoute(routeId: Int, routeData: Map<String, Any>): Result<RouteResponse> {
         return apiClient.safeRequest {
-            put("/routes/$routeId") {
+            put(ApiClient.BASE_URL + "/routes/$routeId") {
                 parameter("token", appValues.authToken.get())
                 setBody(routeData)
             }.body()
@@ -270,7 +270,7 @@ class RoutesService(
 
     suspend fun deleteRoute(routeId: Int): Result<Unit> {
         return apiClient.safeRequest {
-            delete("/routes/$routeId") {
+            delete(ApiClient.BASE_URL + "/routes/$routeId") {
                 parameter("token", appValues.authToken.get())
             }
         }
@@ -290,7 +290,7 @@ class RoutesService(
         optimizationRequest: RouteOptimizationRequest
     ): Result<RouteResponse> {
         return apiClient.safeRequest {
-            post("/routes/$routeId/optimize") {
+            post(ApiClient.BASE_URL + "/routes/$routeId/optimize") {
                 parameter("token", appValues.authToken.get())
                 setBody(optimizationRequest)
             }.body()
@@ -299,7 +299,7 @@ class RoutesService(
 
     suspend fun getRouteStats(): Result<RouteStats> {
         return apiClient.safeRequest {
-            get("/routes/stats/overview") {
+            get(ApiClient.BASE_URL + "/routes/stats/overview") {
                 parameter("token", appValues.authToken.get())
             }.body()
         }
@@ -311,7 +311,7 @@ class RoutesService(
         radiusKm: Double = 10.0
     ): Result<List<RouteResponse>> {
         return apiClient.safeRequest {
-            get("/routes/nearby") {
+            get(ApiClient.BASE_URL + "/routes/nearby") {
                 parameter("token", appValues.authToken.get())
                 parameter("latitude", latitude)
                 parameter("longitude", longitude)

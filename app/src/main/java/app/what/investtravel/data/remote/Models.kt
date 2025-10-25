@@ -30,7 +30,7 @@ data class HotelResponse(
     @SerialName("currency") val currency: String = "RUB",
     @SerialName("amenities") val amenities: List<String>? = null,
     @SerialName("images") val images: List<String>? = null,
-    @SerialName("status") val status: HotelStatus = HotelStatus.ACTIVE,
+    @SerialName("status") val status: String,
     @SerialName("created_at") val createdAt: String,
     @SerialName("updated_at") val updatedAt: String? = null
 )

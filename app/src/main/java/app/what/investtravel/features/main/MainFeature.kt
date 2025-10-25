@@ -15,11 +15,14 @@ import androidx.compose.ui.Modifier
 import app.what.foundation.core.Feature
 import app.what.foundation.core.Monitor.Companion.monitored
 import app.what.foundation.ui.animations.AnimatedEnter
+import app.what.foundation.ui.theme.WHATTheme
 import app.what.investtravel.data.local.settings.AppValues
 import app.what.investtravel.features.assistant.navigation.AssistantProvider
 import app.what.investtravel.features.assistant.navigation.assistantRegistry
 import app.what.investtravel.features.dev.navigation.DevProvider
 import app.what.investtravel.features.dev.navigation.devRegistry
+import app.what.investtravel.features.hotel.navigation.HotelProvider
+import app.what.investtravel.features.hotel.navigation.hotelRegistry
 import app.what.investtravel.features.main.domain.MainController
 import app.what.investtravel.features.main.domain.models.MainEvent
 import app.what.investtravel.features.main.navigation.MainProvider
@@ -30,6 +33,7 @@ import app.what.investtravel.features.settings.navigation.settingsRegistry
 import app.what.investtravel.features.travel.navigation.TravelProvider
 import app.what.investtravel.features.travel.navigation.travelRegistry
 import app.what.investtravel.ui.theme.icons.WHATIcons
+import app.what.investtravel.ui.theme.icons.filled.Building
 import app.what.investtravel.ui.theme.icons.filled.Code
 import app.what.navigation.core.NavComponent
 import app.what.navigation.core.NavigationHost
@@ -63,11 +67,13 @@ class MainFeature(
         val children = listOf(
             navItem("Путешествия", Icons.Default.DateRange, TravelProvider),
             navItem("Ассистент", Icons.Default.Person, AssistantProvider),
+            navItem("Отели", WHATIcons.Building, HotelProvider),
             navItem("Профиль", Icons.Default.Person, ProfileProvider),
             navItem("Настройки", Icons.Default.Settings, SettingsProvider)
         )
 
         val childrenRegistry: Registry = {
+            hotelRegistry()
             profileRegistry()
             assistantRegistry()
             settingsRegistry()

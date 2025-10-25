@@ -363,6 +363,21 @@ fun MyPlaceRequest(lat:Double,lot:Double,takeCoordinates:(Double, Double)->Unit)
         }
     )
 }
+
+fun Geocoder.getCity(lat: Double, lon: Double): String? {
+    return try {
+        val addresses = getFromLocation(lat, lon, 1)
+        if (addresses != null && addresses.isNotEmpty()) {
+            val address = addresses[0]
+            // Формируем строку, например: "улица, город, страна"
+            address.locality ?: "Ростов-на-Дону"
+        } else null
+    } catch (e: Exception) {
+        e.printStackTrace()
+        null
+    }
+}
+
 fun getAddressFromCoordinates(context: Context, latitude: Double, longitude: Double): String? {
     return try {
         val geocoder = Geocoder(context, Locale.getDefault())
@@ -379,7 +394,7 @@ fun getAddressFromCoordinates(context: Context, latitude: Double, longitude: Dou
     }
 }
 @SuppressLint("MissingPermission")
-private fun getLocation(
+fun getLocation(
     fusedLocationClient: FusedLocationProviderClient,
     onLocationReady: (Double, Double) -> Unit
 ) {

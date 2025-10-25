@@ -1,10 +1,11 @@
 package app.what.investtravel
 
+//import app.what.foundation.services.auto_update.GitHubUpdateService
 import android.app.Application
+import android.location.Geocoder
 import androidx.room.Room
 import app.what.foundation.services.AppLogger
 import app.what.foundation.services.AppLogger.Companion.Auditor
-//import app.what.foundation.services.auto_update.GitHubUpdateService
 import app.what.foundation.services.crash.CrashHandler
 import app.what.investtravel.data.local.database.AppDatabase
 import app.what.investtravel.data.local.settings.AppValues
@@ -15,6 +16,7 @@ import app.what.investtravel.data.remote.RoutesService
 import app.what.investtravel.data.remote.UsersService
 import app.what.investtravel.features.assistant.domain.AssistantController
 import app.what.investtravel.features.dev.presentation.NetworkMonitorPlugin
+import app.what.investtravel.features.hotel.domain.HotelController
 import app.what.investtravel.features.main.domain.MainController
 import app.what.investtravel.features.onboarding.domain.OnboardingController
 import app.what.investtravel.features.profile.domain.ProfileController
@@ -23,6 +25,7 @@ import app.what.investtravel.features.travel.domain.TravelController
 import app.what.investtravel.libs.FileManager
 import app.what.investtravel.libs.GoogleDriveParser
 import app.what.investtravel.utils.AppUtils
+import com.google.android.gms.location.LocationServices
 import com.yandex.mapkit.MapKitFactory
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
@@ -35,6 +38,7 @@ import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
 import org.koin.dsl.module
 import java.security.cert.X509Certificate
+import java.util.Locale
 import javax.net.ssl.X509TrustManager
 
 class InvestTravelApp : Application() {
@@ -66,7 +70,10 @@ val generalModule = module {
     single { RoutesService(get(), get()) }
     single { HotelsService(get(), get()) }
 
+    single { Geocoder(get(), Locale.getDefault()) }
+    single { LocationServices.getFusedLocationProviderClient(androidContext()) }
 
+    single<HotelController> { HotelController(get(), get(), get(), get()) }
     single<ProfileController> { ProfileController(get()) }
     single<AssistantController> { AssistantController() }
     single<TravelController> { TravelController() }
