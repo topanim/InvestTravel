@@ -284,12 +284,10 @@ data class ValidationError(
 )
 @Serializable
 data class GenerateCommentRequest(
-    @SerialName("meeting_title") val routeId: String,
-    @SerialName("meeting_text") val comment: String
+    @SerialName("text") val text: String
 )
 @Serializable
 data class GenerateCommentResponse(
     @SerialName("comment") val comment: String,
-    @SerialName("meeting_title") val meetingTitle: String,
     @SerialName("success") val success: Boolean,
 )

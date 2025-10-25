@@ -9,6 +9,8 @@ import app.what.investtravel.data.local.database.PointsDao
 import app.what.investtravel.data.local.database.RoutesDAO
 import app.what.investtravel.data.local.mappers.toEntity
 import app.what.investtravel.data.local.mappers.toPointEntities
+import app.what.investtravel.data.remote.AiService
+import app.what.investtravel.data.remote.GenerateCommentRequest
 import app.what.investtravel.data.remote.RoutesService
 import app.what.investtravel.data.remote.utils.toRoute
 import app.what.investtravel.features.travel.domain.models.Travel
@@ -38,12 +40,16 @@ class TravelController : UIController<TravelState, TravelAction, TravelEvent>(
     val pointsDao: PointsDao by inject(PointsDao::class.java)
     val routesDao: RoutesDAO by inject(RoutesDAO::class.java)
 
+    val aiService: AiService by inject(AiService::class.java)
+
     val mapController = MapKitController()
 
     override fun obtainEvent(viewEvent: TravelEvent) = when (viewEvent) {
         is TravelEvent.TravelSelected -> selectTravel(viewEvent.value)
         is TravelEvent.TravelUnselected -> updateState { copy(selectedTravel = null) }
         is TravelEvent.SaveTravel -> sendTravel(viewEvent.value)
+        is TravelEvent.SetToAi -> sendToAi(viewEvent.value)
+        is TravelEvent.ShowSheet -> updateState { copy(showSheet = false) }
         else -> {}
     }
 
@@ -51,7 +57,21 @@ class TravelController : UIController<TravelState, TravelAction, TravelEvent>(
         updateState { copy(selectedTravel = value) }
     }
 
-    fun sendTravel(userPreferences: UserPreferences){
+    private fun sendToAi(value: TravelObject){
+        updateState { copy(showSheet = true) }
+        viewModelScope.launch(Dispatchers.IO) {
+            aiService.generateComment(GenerateCommentRequest(value.name)).onSuccess {
+              updateState { copy(aiComment = it.comment) }
+            }.onFailure {
+                updateState { copy(showSheet = false) }
+            }
+
+            }
+        }
+
+
+
+    private fun sendTravel(userPreferences: UserPreferences){
         viewModelScope.launch(Dispatchers.IO) {
             updateState { copy(travelsFetchState = RemoteState.Loading) }
            routeService.generateRoute(userPreferences.toRoute()).onSuccess {
