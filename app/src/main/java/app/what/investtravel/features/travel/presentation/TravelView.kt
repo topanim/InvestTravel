@@ -1,6 +1,7 @@
 package app.what.investtravel.features.travel.presentation
 
 import android.annotation.SuppressLint
+import android.graphics.drawable.Icon
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
@@ -23,6 +25,7 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -30,7 +33,9 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -42,7 +47,9 @@ import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
@@ -56,13 +63,17 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import app.what.foundation.core.Listener
 import app.what.foundation.ui.Gap
 import app.what.foundation.ui.VerticalGap
 import app.what.foundation.ui.bclick
+import app.what.foundation.ui.controllers.rememberSheetController
 import app.what.investtravel.features.main.NavBarController
 import app.what.investtravel.features.travel.domain.models.Travel
 import app.what.investtravel.features.travel.domain.models.TravelEvent
@@ -71,10 +82,12 @@ import app.what.investtravel.features.travel.domain.models.TravelState
 import app.what.investtravel.features.travel.presentation.pages.TravelCreatePage
 import app.what.investtravel.ui.components.MapKitController
 import app.what.investtravel.ui.components.YandexMapKit
+import app.what.investtravel.utils.TextSpeaker
 import coil3.compose.AsyncImage
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TravelView(
     state: State<TravelState>,
@@ -83,6 +96,7 @@ fun TravelView(
 ) {
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+    val sheetState = rememberSheetController()
 
     LaunchedEffect(drawerState.currentValue) {
         NavBarController.setVisibility(drawerState.isClosed)
@@ -127,8 +141,63 @@ fun TravelView(
                     )
                 }
             }
+
         }
     )
+    if(!sheetState.opened){
+        sheetState.close()
+        listener.invoke(TravelEvent.ShowSheet)
+    }
+    if (state.value.showSheet) {
+        sheetState.open {
+            AiCommentLayout(state.value.aiComment)
+        }
+    }
+}
+
+@Composable
+fun AiCommentLayout(comment: String) {
+    val context = LocalContext.current
+    val textSpeaker = remember { TextSpeaker(context) }
+    DisposableEffect(Unit) {
+        onDispose {
+            textSpeaker.shutdown()
+        }
+    }
+    if (comment.isEmpty()) {
+        CircularProgressIndicator(modifier = Modifier.size(150.dp))
+    } else {
+        LazyColumn(
+            modifier = Modifier
+                .wrapContentSize()
+                .padding(horizontal = 16.dp),
+        ) {
+            item {
+                Button(
+                    {
+                        textSpeaker.speak(comment.replace("*", ""))
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row() {
+                        Icon(
+                            Icons.Default.PlayArrow, "",
+                            modifier = Modifier.size(40.dp)
+                        )
+                        Gap(10)
+                        Text("Прослушать", fontSize = 30.sp)
+                    }
+
+                }
+            }
+            item {
+                VerticalGap(15)
+                Text(comment, fontSize = 20.sp, textAlign = TextAlign.Start)
+
+            }
+        }
+
+    }
 }
 
 @SuppressLint("DefaultLocale")
@@ -272,7 +341,7 @@ fun TravelItem(item: Travel, onClick: () -> Unit) {
 
 @SuppressLint("DefaultLocale")
 @Composable
-fun TravelObjectItem(item: TravelObject) {
+fun TravelObjectItem(item: TravelObject, setToAi: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -383,7 +452,7 @@ fun TravelObjectItem(item: TravelObject) {
 
                 // Кнопка навигации
                 IconButton(
-                    onClick = { /* Навигация к объекту на карте */ },
+                    onClick = { setToAi() },
                     modifier = Modifier
                         .size(40.dp)
                         .background(
@@ -428,13 +497,14 @@ fun TravelSheet(
             Text(
                 when (pagerState.currentPage) {
                     0 -> "Путешествия"
-                    else -> if(newTravel) "Новое путешевствие" else state.value.selectedTravel?.name ?: "Объекты"
+                    else -> if (newTravel) "Новое путешевствие" else state.value.selectedTravel?.name
+                        ?: "Объекты"
                 },
                 style = typography.headlineSmall,
                 fontWeight = FontWeight.Bold,
                 color = colorScheme.primary,
             )
-            if(pagerState.currentPage == 0) {
+            if (pagerState.currentPage == 0) {
                 Button({
                     scope.launch {
                         newTravel = true
@@ -472,9 +542,9 @@ fun TravelSheet(
         ) { page ->
             when (page) {
                 0 -> TravelsPage(state, listener)
-                1 -> if(newTravel) TravelCreatePage{
+                1 -> if (newTravel) TravelCreatePage {
                     listener.invoke(TravelEvent.SaveTravel(it))
-                } else TravelDetailPage(state)
+                } else TravelDetailPage(state, listener)
             }
         }
 
@@ -528,7 +598,8 @@ fun TravelsPage(
 @SuppressLint("DefaultLocale")
 @Composable
 fun TravelDetailPage(
-    state: State<TravelState>
+    state: State<TravelState>,
+    listener: Listener<TravelEvent>
 ) = LazyColumn(
     modifier = Modifier.fillMaxSize(),
 ) {
@@ -616,7 +687,10 @@ fun TravelDetailPage(
     }
 
     items(state.value.selectedTravel?.objects ?: emptyList()) { travelObject ->
-        TravelObjectItem(travelObject)
+        TravelObjectItem(travelObject) {
+            listener.invoke(TravelEvent.SetToAi(travelObject))
+
+        }
         VerticalGap(8)
     }
 }

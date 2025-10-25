@@ -6,7 +6,9 @@ import app.what.foundation.data.RemoteState
 data class TravelState(
     val travels: List<Travel> = emptyList(),
     val travelsFetchState: RemoteState = RemoteState.Idle,
-    val selectedTravel: Travel? = null
+    val selectedTravel: Travel? = null,
+    val showSheet: Boolean = false,
+    val aiComment: String = ""
 )
 
 data class Travel(

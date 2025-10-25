@@ -9,6 +9,7 @@ import app.what.foundation.services.AppLogger.Companion.Auditor
 import app.what.foundation.services.crash.CrashHandler
 import app.what.investtravel.data.local.database.AppDatabase
 import app.what.investtravel.data.local.settings.AppValues
+import app.what.investtravel.data.remote.AiService
 import app.what.investtravel.data.remote.ApiClient
 import app.what.investtravel.data.remote.AuthService
 import app.what.investtravel.data.remote.HotelsService
@@ -30,6 +31,7 @@ import com.yandex.mapkit.MapKitFactory
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.plugins.logging.Logger
 import io.ktor.client.plugins.logging.Logging
 import io.ktor.serialization.kotlinx.json.json
@@ -69,6 +71,7 @@ val generalModule = module {
     single { UsersService(get(), get()) }
     single { RoutesService(get(), get()) }
     single { HotelsService(get(), get()) }
+    single { AiService(get(), get()) }
 
     single { Geocoder(get(), Locale.getDefault()) }
     single { LocationServices.getFusedLocationProviderClient(androidContext()) }
@@ -100,12 +103,17 @@ val generalModule = module {
                     }
                 }
             }
+
             install(ContentNegotiation) {
                 json(Json {
                     ignoreUnknownKeys = true
                     isLenient = true
                     classDiscriminator = "type"
                 })
+            }
+            defaultRequest {
+                // Подставляем базовый URL для всех запросов
+                url(ApiClient.BASE_URL)
             }
             engine {
                 https {

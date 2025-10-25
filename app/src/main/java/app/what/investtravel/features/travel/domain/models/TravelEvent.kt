@@ -6,4 +6,7 @@ sealed interface TravelEvent {
     class TravelSelected(val value: Travel) : TravelEvent
     object TravelUnselected : TravelEvent
     data class SaveTravel(val value: UserPreferences) : TravelEvent
+
+    data class SetToAi(val value: TravelObject) : TravelEvent
+    object ShowSheet : TravelEvent
 }
