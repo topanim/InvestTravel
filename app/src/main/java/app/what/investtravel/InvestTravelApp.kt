@@ -3,7 +3,7 @@ package app.what.investtravel
 import android.app.Application
 import app.what.foundation.services.AppLogger
 import app.what.foundation.services.AppLogger.Companion.Auditor
-import app.what.foundation.services.auto_update.GitHubUpdateService
+//import app.what.foundation.services.auto_update.GitHubUpdateService
 import app.what.foundation.services.crash.CrashHandler
 import app.what.investtravel.data.local.settings.AppValues
 import app.what.investtravel.data.remote.ApiClient
@@ -56,7 +56,7 @@ val generalModule = module {
     single { AppUtils(get()) }
     single { GoogleDriveParser(get()) }
     single { FileManager(get()) }
-    single { GitHubUpdateService(get()) }
+//    single { GitHubUpdateService(get()) }
 
     single { ApiClient(get(), get()) }
     single { AuthService(get()) }

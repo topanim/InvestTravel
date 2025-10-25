@@ -2,6 +2,7 @@ package app.what.investtravel.features.travel.presentation
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -67,9 +68,11 @@ import app.what.investtravel.features.travel.domain.models.Travel
 import app.what.investtravel.features.travel.domain.models.TravelEvent
 import app.what.investtravel.features.travel.domain.models.TravelObject
 import app.what.investtravel.features.travel.domain.models.TravelState
+import app.what.investtravel.features.travel.presentation.pages.TravelCreatePage
 import app.what.investtravel.ui.components.MapKitController
 import app.what.investtravel.ui.components.YandexMapKit
 import coil3.compose.AsyncImage
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
@@ -405,7 +408,9 @@ fun TravelSheet(
     state: State<TravelState>,
     listener: Listener<TravelEvent>
 ) {
-    val pagerState = rememberPagerState { 2 }
+    val pagerState = rememberPagerState { 3 }
+    val scope = rememberCoroutineScope()
+    var newTravel by remember { mutableStateOf(false) }
 
     LaunchedEffect(state.value.selectedTravel) {
         if (state.value.selectedTravel != null) pagerState.animateScrollToPage(1)
@@ -417,18 +422,28 @@ fun TravelSheet(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
                 when (pagerState.currentPage) {
                     0 -> "Путешествия"
-                    else -> state.value.selectedTravel?.name ?: "Объекты"
+                    else -> if(newTravel) "Новое путешевствие" else state.value.selectedTravel?.name ?: "Объекты"
                 },
                 style = typography.headlineSmall,
                 fontWeight = FontWeight.Bold,
                 color = colorScheme.primary,
-                modifier = Modifier.weight(1f)
             )
+            if(pagerState.currentPage == 0) {
+                Button({
+                    scope.launch {
+                        newTravel = true
+                        pagerState.animateScrollToPage(1)
+                    }
+                }) {
+                    Text("Создать путешевствие")
+                }
+            }
 
             // Индикатор страниц
             Row {
@@ -457,14 +472,18 @@ fun TravelSheet(
         ) { page ->
             when (page) {
                 0 -> TravelsPage(state, listener)
-                1 -> TravelDetailPage(state)
+                1 -> if(newTravel) TravelCreatePage(){} else TravelDetailPage(state)
             }
         }
 
         if (pagerState.currentPage == 1) {
             Button(
                 onClick = {
-                    listener(TravelEvent.TravelUnselected)
+                    scope.launch {
+                        pagerState.animateScrollToPage(0)
+                        listener(TravelEvent.TravelUnselected)
+                        newTravel = false
+                    }
                 },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -502,6 +521,7 @@ fun TravelsPage(
         VerticalGap(8)
     }
 }
+
 
 @SuppressLint("DefaultLocale")
 @Composable

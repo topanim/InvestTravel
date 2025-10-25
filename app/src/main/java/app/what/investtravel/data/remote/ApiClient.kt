@@ -10,7 +10,7 @@ class ApiClient(
 ) {
     // TODO: use appValues.authToken.get() or .set()
     companion object {
-        const val BASE_URL = "todo"
+        const val BASE_URL = "http://45.155.207.232:1478"
     }
 
     suspend fun <T> safeRequest(block: suspend HttpClient.() -> T): Result<T> {
