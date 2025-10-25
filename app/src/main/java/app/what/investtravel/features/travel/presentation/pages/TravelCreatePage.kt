@@ -2,7 +2,9 @@ package app.what.investtravel.features.travel.presentation.pages
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.pm.PackageManager
+import android.location.Geocoder
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -45,6 +47,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -68,6 +71,7 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import java.util.Locale
 import kotlin.math.roundToInt
 
 @Composable
@@ -97,6 +101,11 @@ fun TravelCreatePage(
     val preferNearby = remember { mutableStateOf<Boolean?>(null) }
     val avoidNightTime = remember { mutableStateOf<Boolean?>(null) }
     val requireFoodPoints = remember { mutableStateOf<Boolean?>(null) }
+    val address = remember { mutableStateOf<String?>(null) }
+    val context = LocalContext.current
+    LaunchedEffect(startLatitude.value) {
+        address.value = getAddressFromCoordinates(context, startLatitude.value, startLongitude.value)
+    }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -188,12 +197,12 @@ fun TravelCreatePage(
                     leisureTime.value,
                     shoppingTime.value,
                     mealsPerDay.value,
-                    startLatitude.value,
-                    startLongitude.value,
+                    address.value,
                     maxDistanceKm.value,
                     preferNearby.value,
                     avoidNightTime.value,
                     requireFoodPoints.value,
+
 
                     )
                 Button(
@@ -354,6 +363,21 @@ fun MyPlaceRequest(lat:Double,lot:Double,takeCoordinates:(Double, Double)->Unit)
         }
     )
 }
+fun getAddressFromCoordinates(context: Context, latitude: Double, longitude: Double): String? {
+    return try {
+        val geocoder = Geocoder(context, Locale.getDefault())
+        val addresses = geocoder.getFromLocation(latitude, longitude, 1)
+        if (addresses != null && addresses.isNotEmpty()) {
+            val address = addresses[0]
+            // Формируем строку, например: "улица, город, страна"
+            listOfNotNull(address.thoroughfare,address.subThoroughfare, address.locality, address.countryName)
+                .joinToString(", ")
+        } else null
+    } catch (e: Exception) {
+        e.printStackTrace()
+        null
+    }
+}
 @SuppressLint("MissingPermission")
 private fun getLocation(
     fusedLocationClient: FusedLocationProviderClient,
@@ -448,8 +472,7 @@ fun ShowResultCard(
     leisureTime: Float,
     shoppingTime: Float,
     mealsPerDay: Float,
-    startLatitude: Double,
-    startLongitude: Double,
+    startAddress: String?,
     maxDistanceKm: Float,
     preferNearby: Boolean?,
     avoidNightTime: Boolean?,
@@ -460,7 +483,8 @@ fun ShowResultCard(
             modifier = Modifier
                 .fillMaxWidth()
         ) {
-            Column(modifier = Modifier.padding(10.dp)) {
+            Column(modifier = Modifier.padding(10.dp),
+                horizontalAlignment = Alignment.Start) {
                 Text("Состав маршрута :", fontSize = 30.sp)
                 TextForCard("Время начала", value = startTime)
                 TextForCard("Время конца", value = endTime)
@@ -474,7 +498,7 @@ fun ShowResultCard(
                 TextForCard("Время на искусство", value = artTime.toInt().toString())
                 TextForCard("Искусство", value = art.toInt().toString())
                 TextForCard("Время на досуг", value = leisureTime.toInt().toString())
-                TextForCard("Мое местоположение", value = "${startLatitude}, $startLongitude")
+                TextForCard("Мое местоположение", value = "$startAddress")
                 TextForCard("Время на покупки", value = shoppingTime.toInt().toString())
                 TextForCard("Приёмов пищи в день", value = mealsPerDay.toInt().toString())
                 TextForCard("Максимальная дистанция", value = maxDistanceKm.toInt().toString())
@@ -513,16 +537,15 @@ data class UserPreferences(
 
 @Composable
 fun TextForCard(title: String, value: String) {
-    if (value.isNotBlank() && value != "0" && value != "null" && value != "0.0") {
+    if (value.isNotBlank() && value != "0" && value != "null") {
         val value = when (value) {
             "true" -> "Да"
             "false" -> "Нет"
             else -> value
         }
-        Row {
-            Text("$title - ")
-            Text(value)
-        }
+        Text("$title - $value")
+
+
     }
 }
 
