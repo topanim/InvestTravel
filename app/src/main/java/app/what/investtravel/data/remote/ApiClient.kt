@@ -5,8 +5,7 @@ import io.ktor.client.HttpClient
 
 class ApiClient(
     private val client: HttpClient,
-    private val appValues: AppValues,
-    private var token: String? = null
+    private val appValues: AppValues
 ) {
     // TODO: use appValues.authToken.get() or .set()
     companion object {
@@ -22,10 +21,10 @@ class ApiClient(
     }
 
     fun updateToken(newToken: String) {
-        token = newToken
+        appValues.authToken.set(newToken)
     }
 
     fun clearToken() {
-        token = null
+        appValues.authToken.set(null)
     }
 }

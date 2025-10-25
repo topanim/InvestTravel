@@ -8,6 +8,7 @@ import app.what.foundation.services.crash.CrashHandler
 import app.what.investtravel.data.local.settings.AppValues
 import app.what.investtravel.data.remote.ApiClient
 import app.what.investtravel.data.remote.AuthService
+import app.what.investtravel.data.remote.HotelsService
 import app.what.investtravel.data.remote.RoutesService
 import app.what.investtravel.data.remote.UsersService
 import app.what.investtravel.features.assistant.domain.AssistantController
@@ -56,12 +57,12 @@ val generalModule = module {
     single { AppUtils(get()) }
     single { GoogleDriveParser(get()) }
     single { FileManager(get()) }
-//    single { GitHubUpdateService(get()) }
 
     single { ApiClient(get(), get()) }
-    single { AuthService(get()) }
-    single { UsersService(get()) }
-    single { RoutesService(get()) }
+    single { AuthService(get(), get()) }
+    single { UsersService(get(), get()) }
+    single { RoutesService(get(), get()) }
+    single { HotelsService(get(), get()) }
 
 
     single<ProfileController> { ProfileController(get()) }

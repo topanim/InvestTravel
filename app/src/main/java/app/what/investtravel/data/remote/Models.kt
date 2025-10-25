@@ -3,7 +3,144 @@ package app.what.investtravel.data.remote
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-// Auth Models
+
+@Serializable
+data class HotelListResponse(
+    @SerialName("hotels") val hotels: List<HotelResponse>,
+    @SerialName("total") val total: Int,
+    @SerialName("page") val page: Int,
+    @SerialName("size") val size: Int,
+    @SerialName("total_pages") val totalPages: Int
+)
+
+@Serializable
+data class HotelResponse(
+    @SerialName("id") val id: Int,
+    @SerialName("name") val name: String,
+    @SerialName("description") val description: String? = null,
+    @SerialName("address") val address: String,
+    @SerialName("city") val city: String,
+    @SerialName("latitude") val latitude: Double,
+    @SerialName("longitude") val longitude: Double,
+    @SerialName("phone") val phone: String? = null,
+    @SerialName("email") val email: String? = null,
+    @SerialName("website") val website: String? = null,
+    @SerialName("stars") val stars: Int = 3,
+    @SerialName("price_per_night") val pricePerNight: Double,
+    @SerialName("currency") val currency: String = "RUB",
+    @SerialName("amenities") val amenities: List<String>? = null,
+    @SerialName("images") val images: List<String>? = null,
+    @SerialName("status") val status: HotelStatus = HotelStatus.ACTIVE,
+    @SerialName("created_at") val createdAt: String,
+    @SerialName("updated_at") val updatedAt: String? = null
+)
+
+@Serializable
+enum class HotelStatus {
+    @SerialName("active") ACTIVE,
+    @SerialName("inactive") INACTIVE,
+    @SerialName("maintenance") MAINTENANCE
+}
+
+// Booking Models
+@Serializable
+data class HotelBookingRequest(
+    @SerialName("hotel_id") val hotelId: Int,
+    @SerialName("check_in_date") val checkInDate: String,
+    @SerialName("check_out_date") val checkOutDate: String,
+    @SerialName("guests_count") val guestsCount: Int = 1,
+    @SerialName("rooms_count") val roomsCount: Int = 1,
+    @SerialName("special_requests") val specialRequests: String? = null
+)
+
+@Serializable
+data class HotelBookingResponse(
+    @SerialName("id") val id: Int,
+    @SerialName("hotel_id") val hotelId: Int,
+    @SerialName("user_id") val userId: Int,
+    @SerialName("check_in_date") val checkInDate: String,
+    @SerialName("check_out_date") val checkOutDate: String,
+    @SerialName("guests_count") val guestsCount: Int,
+    @SerialName("rooms_count") val roomsCount: Int,
+    @SerialName("total_price") val totalPrice: Double,
+    @SerialName("currency") val currency: String,
+    @SerialName("status") val status: BookingStatus,
+    @SerialName("special_requests") val specialRequests: String? = null,
+    @SerialName("created_at") val createdAt: String,
+    @SerialName("updated_at") val updatedAt: String? = null
+)
+
+@Serializable
+enum class BookingStatus {
+    @SerialName("pending") PENDING,
+    @SerialName("confirmed") CONFIRMED,
+    @SerialName("cancelled") CANCELLED,
+    @SerialName("completed") COMPLETED
+}
+
+// Payment Models
+@Serializable
+data class HotelPaymentRequest(
+    @SerialName("booking_id") val bookingId: Int,
+    @SerialName("payment_method") val paymentMethod: String,
+    @SerialName("payment_provider") val paymentProvider: String? = "mock"
+)
+
+@Serializable
+data class HotelPaymentResponse(
+    @SerialName("id") val id: Int,
+    @SerialName("booking_id") val bookingId: Int,
+    @SerialName("hotel_id") val hotelId: Int,
+    @SerialName("user_id") val userId: Int,
+    @SerialName("amount") val amount: Double,
+    @SerialName("currency") val currency: String,
+    @SerialName("payment_method") val paymentMethod: String,
+    @SerialName("payment_provider") val paymentProvider: String?,
+    @SerialName("external_payment_id") val externalPaymentId: String? = null,
+    @SerialName("status") val status: PaymentStatus,
+    @SerialName("payment_url") val paymentUrl: String? = null,
+    @SerialName("failure_reason") val failureReason: String? = null,
+    @SerialName("created_at") val createdAt: String,
+    @SerialName("updated_at") val updatedAt: String? = null,
+    @SerialName("paid_at") val paidAt: String? = null
+)
+
+@Serializable
+enum class PaymentStatus {
+    @SerialName("pending") PENDING,
+    @SerialName("completed") COMPLETED,
+    @SerialName("failed") FAILED,
+    @SerialName("cancelled") CANCELLED,
+    @SerialName("refunded") REFUNDED
+}
+
+// User Bookings & Payments Responses
+@Serializable
+data class UserBookingsResponse(
+    @SerialName("bookings") val bookings: List<HotelBookingResponse>,
+    @SerialName("total") val total: Int,
+    @SerialName("page") val page: Int,
+    @SerialName("size") val size: Int
+)
+
+@Serializable
+data class UserPaymentsResponse(
+    @SerialName("payments") val payments: List<HotelPaymentResponse>,
+    @SerialName("total") val total: Int,
+    @SerialName("page") val page: Int,
+    @SerialName("size") val size: Int
+)
+
+// Payment Callback
+@Serializable
+data class PaymentCallbackRequest(
+    @SerialName("payment_id") val paymentId: String,
+    @SerialName("status") val status: String,
+    @SerialName("amount") val amount: Double? = null,
+    @SerialName("currency") val currency: String? = null,
+    @SerialName("signature") val signature: String? = null
+)
+
 @Serializable
 data class LoginRequest(
     @SerialName("login") val login: String,

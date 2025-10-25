@@ -1,5 +1,6 @@
 package app.what.investtravel.data.remote
 
+import app.what.investtravel.data.local.settings.AppValues
 import io.ktor.client.call.body
 import io.ktor.client.request.delete
 import io.ktor.client.request.get
@@ -8,11 +9,152 @@ import io.ktor.client.request.post
 import io.ktor.client.request.put
 import io.ktor.client.request.setBody
 
-// Auth Service
-class AuthService(private val apiClient: ApiClient) {
+class HotelsService(
+    private val apiClient: ApiClient,
+    private val appValues: AppValues
+) {
+
+    // Search Hotels
+    suspend fun searchHotels(
+        city: String,
+        checkIn: String? = null,
+        checkOut: String? = null,
+        guests: Int = 1,
+        rooms: Int = 1,
+        minPrice: Double? = null,
+        maxPrice: Double? = null,
+        stars: String? = null,
+        amenities: String? = null,
+        page: Int = 1,
+        size: Int = 10
+    ): Result<HotelListResponse> {
+        return apiClient.safeRequest {
+            get("/hotels/search") {
+                parameter("token", appValues.authToken.get())
+                parameter("city", city)
+                checkIn?.let { parameter("check_in", it) }
+                checkOut?.let { parameter("check_out", it) }
+                parameter("guests", guests)
+                parameter("rooms", rooms)
+                minPrice?.let { parameter("min_price", it) }
+                maxPrice?.let { parameter("max_price", it) }
+                stars?.let { parameter("stars", it) }
+                amenities?.let { parameter("amenities", it) }
+                parameter("page", page)
+                parameter("size", size)
+            }.body()
+        }
+    }
+
+    // Get Hotels by City
+    suspend fun getHotelsByCity(
+        city: String,
+        page: Int = 1,
+        size: Int = 10
+    ): Result<HotelListResponse> {
+        return apiClient.safeRequest {
+            get("/hotels/city/$city") {
+                parameter("page", page)
+                parameter("size", size)
+                parameter("token", appValues.authToken.get())
+            }.body()
+        }
+    }
+
+    // Get Hotel by ID
+    suspend fun getHotelById(hotelId: Int): Result<HotelResponse> {
+        return apiClient.safeRequest {
+            get("/hotels/$hotelId") {
+                parameter("token", appValues.authToken.get())
+            }.body()
+        }
+    }
+
+    // Book Hotel
+    suspend fun bookHotel(bookingRequest: HotelBookingRequest): Result<HotelBookingResponse> {
+        return apiClient.safeRequest {
+            post("/hotels/book") {
+                parameter("token", appValues.authToken.get())
+                setBody(bookingRequest)
+            }.body()
+        }
+    }
+
+    // Get My Bookings
+    suspend fun getMyBookings(
+        page: Int = 1,
+        size: Int = 10
+    ): Result<UserBookingsResponse> {
+        return apiClient.safeRequest {
+            get("/hotels/bookings/my") {
+                parameter("token", appValues.authToken.get())
+                parameter("page", page)
+                parameter("size", size)
+            }.body()
+        }
+    }
+
+    // Create Payment
+    suspend fun createPayment(paymentRequest: HotelPaymentRequest): Result<HotelPaymentResponse> {
+        return apiClient.safeRequest {
+            post("/hotels/payments/create") {
+                parameter("token", appValues.authToken.get())
+                setBody(paymentRequest)
+            }.body()
+        }
+    }
+
+    // Get My Payments
+    suspend fun getMyPayments(
+        page: Int = 1,
+        size: Int = 10
+    ): Result<UserPaymentsResponse> {
+        return apiClient.safeRequest {
+            get("/hotels/payments/my") {
+                parameter("token", appValues.authToken.get())
+                parameter("page", page)
+                parameter("size", size)
+            }.body()
+        }
+    }
+
+    // Simulate Payment Success (for testing)
+    suspend fun simulatePaymentSuccess(paymentId: Int): Result<Map<String, Any>> {
+        return apiClient.safeRequest {
+            post("/hotels/payments/$paymentId/simulate-success") {
+                parameter("token", appValues.authToken.get())
+            }.body()
+        }
+    }
+
+    // Cancel Booking
+    suspend fun cancelBooking(bookingId: Int): Result<Map<String, Any>> {
+        return apiClient.safeRequest {
+            post("/hotels/bookings/$bookingId/cancel") {
+                parameter("token", appValues.authToken.get())
+            }.body()
+        }
+    }
+
+    // Payment Callback (usually called by payment provider)
+    suspend fun paymentCallback(callbackRequest: PaymentCallbackRequest): Result<Map<String, Any>> {
+        return apiClient.safeRequest {
+            post("/hotels/payments/callback") {
+                parameter("token", appValues.authToken.get())
+                setBody(callbackRequest)
+            }.body()
+        }
+    }
+}
+
+class AuthService(
+    private val apiClient: ApiClient,
+    private val appValues: AppValues
+) {
     suspend fun login(loginRequest: LoginRequest): Result<TokenResponse> {
         return apiClient.safeRequest {
             post("/auth/login/") {
+                parameter("token", appValues.authToken.get())
                 setBody(loginRequest)
             }.body()
         }
@@ -20,10 +162,14 @@ class AuthService(private val apiClient: ApiClient) {
 }
 
 // Users Service
-class UsersService(private val apiClient: ApiClient) {
+class UsersService(
+    private val apiClient: ApiClient,
+    private val appValues: AppValues
+) {
     suspend fun createUser(userCreate: UserCreate): Result<UserCreate> {
         return apiClient.safeRequest {
             post("/users/") {
+                parameter("token", appValues.authToken.get())
                 setBody(userCreate)
             }.body()
         }
@@ -37,13 +183,16 @@ class UsersService(private val apiClient: ApiClient) {
 
     suspend fun getUser(userId: Int): Result<UserCreate> {
         return apiClient.safeRequest {
-            get("/users/$userId").body()
+            get("/users/$userId") {
+                parameter("token", appValues.authToken.get())
+            }.body()
         }
     }
 
     suspend fun updateUser(userId: Int, userCreate: UserCreate): Result<UserCreate> {
         return apiClient.safeRequest {
             put("/users/$userId") {
+                parameter("token", appValues.authToken.get())
                 setBody(userCreate)
             }.body()
         }
@@ -51,22 +200,30 @@ class UsersService(private val apiClient: ApiClient) {
 
     suspend fun deleteUser(userId: Int): Result<Unit> {
         return apiClient.safeRequest {
-            delete("/users/$userId")
+            delete("/users/$userId") {
+                parameter("token", appValues.authToken.get())
+            }
         }
     }
 
     suspend fun getCurrentUser(): Result<UserMoreModel> {
         return apiClient.safeRequest {
-            get("/users/user/me").body()
+            get("/users/user/me") {
+                parameter("token", appValues.authToken.get())
+            }.body()
         }
     }
 }
 
 // Routes Service
-class RoutesService(private val apiClient: ApiClient) {
+class RoutesService(
+    private val apiClient: ApiClient,
+    private val appValues: AppValues
+) {
     suspend fun generateRoute(routeRequest: RouteRequest): Result<RouteResponse> {
         return apiClient.safeRequest {
             post("/routes/generate") {
+                parameter("token", appValues.authToken.get())
                 setBody(routeRequest)
             }.body()
         }
@@ -80,6 +237,7 @@ class RoutesService(private val apiClient: ApiClient) {
     ): Result<List<RouteResponse>> {
         return apiClient.safeRequest {
             get("/routes/") {
+                parameter("token", appValues.authToken.get())
                 parameter("skip", skip)
                 parameter("limit", limit)
                 category?.let { parameter("category", it) }
@@ -90,13 +248,16 @@ class RoutesService(private val apiClient: ApiClient) {
 
     suspend fun getRoute(routeId: Int): Result<RouteResponse> {
         return apiClient.safeRequest {
-            get("/routes/$routeId").body()
+            get("/routes/$routeId") {
+                parameter("token", appValues.authToken.get())
+            }.body()
         }
     }
 
     suspend fun updateRoute(routeId: Int, routeData: Map<String, Any>): Result<RouteResponse> {
         return apiClient.safeRequest {
             put("/routes/$routeId") {
+                parameter("token", appValues.authToken.get())
                 setBody(routeData)
             }.body()
         }
@@ -104,13 +265,16 @@ class RoutesService(private val apiClient: ApiClient) {
 
     suspend fun deleteRoute(routeId: Int): Result<Unit> {
         return apiClient.safeRequest {
-            delete("/routes/$routeId")
+            delete("/routes/$routeId") {
+                parameter("token", appValues.authToken.get())
+            }
         }
     }
 
     suspend fun duplicateRoute(routeId: Int, newName: String? = null): Result<RouteResponse> {
         return apiClient.safeRequest {
             post("/routes/$routeId/duplicate") {
+                parameter("token", appValues.authToken.get())
                 newName?.let { parameter("new_name", it) }
             }.body()
         }
@@ -122,6 +286,7 @@ class RoutesService(private val apiClient: ApiClient) {
     ): Result<RouteResponse> {
         return apiClient.safeRequest {
             post("/routes/$routeId/optimize") {
+                parameter("token", appValues.authToken.get())
                 setBody(optimizationRequest)
             }.body()
         }
@@ -129,7 +294,9 @@ class RoutesService(private val apiClient: ApiClient) {
 
     suspend fun getRouteStats(): Result<RouteStats> {
         return apiClient.safeRequest {
-            get("/routes/stats/overview").body()
+            get("/routes/stats/overview") {
+                parameter("token", appValues.authToken.get())
+            }.body()
         }
     }
 
@@ -140,6 +307,7 @@ class RoutesService(private val apiClient: ApiClient) {
     ): Result<List<RouteResponse>> {
         return apiClient.safeRequest {
             get("/routes/nearby") {
+                parameter("token", appValues.authToken.get())
                 parameter("latitude", latitude)
                 parameter("longitude", longitude)
                 parameter("radius_km", radiusKm)
