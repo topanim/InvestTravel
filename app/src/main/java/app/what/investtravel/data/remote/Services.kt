@@ -226,7 +226,7 @@ class RoutesService(
 ) {
     suspend fun generateRoute(routeRequest: RouteRequest): Result<RouteResponse> {
         return apiClient.safeRequest {
-            post("/routes/generate") {
+            post(ApiClient.BASE_URL + "/routes/generate") {
                 parameter("token", appValues.authToken.get())
                 contentType(ContentType.Application.Json)
                 setBody(routeRequest)

@@ -23,8 +23,8 @@ class HotelController(
     }
 
     fun fetchHotels() {
-        hotelService.searchHotels(
-
-        )
+//        hotelService.searchHotels(
+//
+//        )
     }
 }

@@ -36,8 +36,8 @@ class MainActivity : ComponentActivity() {
                 ProvideGlobalDialog {
                     ProvideGlobalSheet {
                         NavigationHost(
-                            start = if (settings.isFirstLaunch.get()!!) OnboardingProvider
-                            else MainProvider
+                            start =// if (settings.isFirstLaunch.get()!!) OnboardingProvider
+                             MainProvider
                         ) {
                             mainRegistry()
                             onboardingRegistry()

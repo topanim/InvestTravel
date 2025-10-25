@@ -494,8 +494,12 @@ fun ShowResultCard(
                 horizontalAlignment = Alignment.Start) {
 
                 Text("Состав маршрута :", fontSize = 30.sp)
-                TextForCard("Время начала", value = isoToShortDate(startTime))
-                TextForCard("Время конца", value = isoToShortDate( endTime))
+                if(startTime.isNotBlank()) {
+                    TextForCard("Время начала", value = isoToShortDate(startTime))
+                }
+                if(endTime.isNotBlank()) {
+                    TextForCard("Время конца", value = isoToShortDate(endTime))
+                }
                 TextForCard("Время еды", value = foodTime.toInt().toString())
                 TextForCard("Рестораны", value = restaurant.toInt().toString())
                 TextForCard("Время на перекус", value = fastFoodTime.toInt().toString())
