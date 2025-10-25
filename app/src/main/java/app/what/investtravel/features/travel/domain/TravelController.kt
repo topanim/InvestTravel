@@ -5,6 +5,10 @@ import androidx.lifecycle.viewModelScope
 import app.what.foundation.core.UIController
 import app.what.foundation.data.RemoteState
 import app.what.foundation.utils.suspendCall
+import app.what.investtravel.data.local.database.PointsDao
+import app.what.investtravel.data.local.database.RoutesDAO
+import app.what.investtravel.data.local.mappers.toEntity
+import app.what.investtravel.data.local.mappers.toPointEntities
 import app.what.investtravel.data.remote.RoutesService
 import app.what.investtravel.data.remote.utils.toRoute
 import app.what.investtravel.features.travel.domain.models.Travel
@@ -22,6 +26,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import org.koin.java.KoinJavaComponent.inject
+import kotlin.getValue
 
 class TravelController : UIController<TravelState, TravelAction, TravelEvent>(
     TravelState()
@@ -30,6 +35,8 @@ class TravelController : UIController<TravelState, TravelAction, TravelEvent>(
         fetchTravels()
     }
     val routeService: RoutesService by inject(RoutesService::class.java)
+    val pointsDao: PointsDao by inject(PointsDao::class.java)
+    val routesDao: RoutesDAO by inject(RoutesDAO::class.java)
 
     val mapController = MapKitController()
 
@@ -48,7 +55,10 @@ class TravelController : UIController<TravelState, TravelAction, TravelEvent>(
         viewModelScope.launch(Dispatchers.IO) {
             updateState { copy(travelsFetchState = RemoteState.Loading) }
            routeService.generateRoute(userPreferences.toRoute()).onSuccess {
-               Log.d("ответ",it.toString())
+               val respToEntity = it.toEntity()
+               val pointsToEntity = it.points.toPointEntities(respToEntity.id)
+               routesDao.insert(respToEntity)
+               pointsDao.insert(pointsToEntity)
                updateState { copy(travelsFetchState = RemoteState.Success) }
            }.onFailure {
                Log.d("ответ",it.toString())

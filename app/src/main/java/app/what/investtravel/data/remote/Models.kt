@@ -228,8 +228,8 @@ data class RouteResponse(
     @SerialName("description") val description: String?,
     @SerialName("start_date") val startDate: String,
     @SerialName("end_date") val endDate: String,
-    @SerialName("total_duration_hours") val totalDurationHours: Double,
-    @SerialName("total_distance_km") val totalDistanceKm: Double,
+    @SerialName("total_duration_hours") val totalDurationHours: Int,
+    @SerialName("total_distance_km") val totalDistanceKm: Int,
     @SerialName("total_objects") val totalObjects: Int,
     @SerialName("categories_covered") val categoriesCovered: List<String>,
     @SerialName("points") val points: List<RoutePointResponse>,
@@ -250,7 +250,7 @@ data class RoutePointResponse(
     @SerialName("duration_minutes") val durationMinutes: Int,
     @SerialName("travel_time_minutes") val travelTimeMinutes: Int?,
     @SerialName("description") val description: String?,
-    @SerialName("distance_to_next_km") val distanceToNextKm: Double?
+    @SerialName("distance_to_next_km") val distanceToNextKm: Int
 )
 
 @Serializable
