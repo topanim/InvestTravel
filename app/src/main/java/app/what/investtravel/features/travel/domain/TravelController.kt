@@ -47,7 +47,7 @@ class TravelController : UIController<TravelState, TravelAction, TravelEvent>(
         else -> {}
     }
 
-    fun selectTravel(value: Travel) {
+    private fun selectTravel(value: Travel) {
         updateState { copy(selectedTravel = value) }
     }
 
