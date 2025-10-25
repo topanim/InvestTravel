@@ -1,18 +1,27 @@
 package app.what.investtravel.features.travel.domain
 
+import android.util.Log
 import androidx.lifecycle.viewModelScope
 import app.what.foundation.core.UIController
 import app.what.foundation.data.RemoteState
 import app.what.foundation.utils.suspendCall
+import app.what.investtravel.data.remote.RoutesService
+import app.what.investtravel.data.remote.utils.toRoute
 import app.what.investtravel.features.travel.domain.models.Travel
 import app.what.investtravel.features.travel.domain.models.TravelAction
 import app.what.investtravel.features.travel.domain.models.TravelEvent
 import app.what.investtravel.features.travel.domain.models.TravelObject
 import app.what.investtravel.features.travel.domain.models.TravelState
+import app.what.investtravel.features.travel.presentation.pages.UserPreferences
 import app.what.investtravel.ui.components.MapKitController
 import com.yandex.mapkit.geometry.Point
 import com.yandex.runtime.image.ImageProvider
+import io.ktor.client.plugins.logging.Logging
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import org.koin.compose.koinInject
+import org.koin.java.KoinJavaComponent.inject
 
 class TravelController : UIController<TravelState, TravelAction, TravelEvent>(
     TravelState()
@@ -20,17 +29,31 @@ class TravelController : UIController<TravelState, TravelAction, TravelEvent>(
     init {
         fetchTravels()
     }
+    val routeService: RoutesService by inject(RoutesService::class.java)
 
     val mapController = MapKitController()
 
     override fun obtainEvent(viewEvent: TravelEvent) = when (viewEvent) {
         is TravelEvent.TravelSelected -> selectTravel(viewEvent.value)
         is TravelEvent.TravelUnselected -> updateState { copy(selectedTravel = null) }
+        is TravelEvent.SaveTravel -> sendTravel(viewEvent.value)
         else -> {}
     }
 
     fun selectTravel(value: Travel) {
         updateState { copy(selectedTravel = value) }
+    }
+
+    fun sendTravel(userPreferences: UserPreferences){
+        viewModelScope.launch(Dispatchers.IO) {
+            updateState { copy(travelsFetchState = RemoteState.Loading) }
+           routeService.generateRoute(userPreferences.toRoute()).onSuccess {
+               Log.d("ответ",it.toString())
+               updateState { copy(travelsFetchState = RemoteState.Success) }
+           }.onFailure {
+               Log.d("ответ",it.toString())
+           }
+        }
     }
 
     fun fetchTravels() {

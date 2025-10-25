@@ -472,7 +472,9 @@ fun TravelSheet(
         ) { page ->
             when (page) {
                 0 -> TravelsPage(state, listener)
-                1 -> if(newTravel) TravelCreatePage(){} else TravelDetailPage(state)
+                1 -> if(newTravel) TravelCreatePage(){
+                    listener.invoke(TravelEvent.SaveTravel(it))
+                } else TravelDetailPage(state)
             }
         }
 

@@ -1,10 +1,14 @@
 package app.what.investtravel.features.travel.presentation.pages
 
+import android.Manifest
+import android.annotation.SuppressLint
+import android.content.pm.PackageManager
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -26,7 +30,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
-import androidx.compose.material3.Checkbox
+import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
@@ -51,14 +55,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.text.isDigitsOnly
-import app.what.foundation.ui.Gap
-import app.what.foundation.ui.useState
+import androidx.core.content.ContextCompat
 import app.what.investtravel.R
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
@@ -67,12 +72,11 @@ import kotlin.math.roundToInt
 
 @Composable
 fun TravelCreatePage(
-    saveTravel: () -> Unit
+    saveTravel: (UserPreferences) -> Unit
 ) {
     BackHandler {
 
     }
-    val selectedDate = remember { mutableStateOf(false) }
     val startTime = remember { mutableStateOf<String>("") }
     val endTime = remember { mutableStateOf<String>("") }
     val foodTime = remember { mutableStateOf(0f) }
@@ -87,8 +91,8 @@ fun TravelCreatePage(
     val leisureTime = remember { mutableStateOf(0f) }
     val shoppingTime = remember { mutableStateOf(0f) }
     val mealsPerDay = remember { mutableStateOf(0f) }
-    val startLatitude = remember { mutableStateOf(0f) }
-    val startLongitude = remember { mutableStateOf(0f) }
+    val startLatitude = remember { mutableStateOf<Double>(0.0) }
+    val startLongitude = remember { mutableStateOf<Double>(0.0) }
     val maxDistanceKm = remember { mutableStateOf(0f) }
     val preferNearby = remember { mutableStateOf<Boolean?>(null) }
     val avoidNightTime = remember { mutableStateOf<Boolean?>(null) }
@@ -159,32 +163,72 @@ fun TravelCreatePage(
             QuestionCheckBox("Места для еды", requireFoodPoints.value) {
                 requireFoodPoints.value = it
             }
+            MyPlaceRequest(startLatitude.value,startLongitude.value) { lat,lon ->
+                startLatitude.value = lat
+                startLongitude.value = lon
+            }
         }
         Spacer(modifier = Modifier.weight(1f))
         this.AnimatedVisibility(
-            startTime.value.isNotBlank() || endTime.value.isNotBlank() || foodTime.value > 0 || restaurant.value > 0 || fastFoodTime.value > 0 || cafeTime.value > 0 || barTime.value > 0 || tourismTime.value > 0 || tourism.value > 0 || artTime.value > 0 || art.value > 0 || leisureTime.value > 0 || shoppingTime.value > 0 || mealsPerDay.value > 0 || maxDistanceKm.value > 0 || preferNearby.value != null || avoidNightTime.value != null || requireFoodPoints.value != null
+            startTime.value.isNotBlank() || endTime.value.isNotBlank() || foodTime.value > 0 || restaurant.value > 0 || fastFoodTime.value > 0 || cafeTime.value > 0 || barTime.value > 0 || tourismTime.value > 0 || tourism.value > 0 || artTime.value > 0 || art.value > 0 || leisureTime.value > 0 || shoppingTime.value > 0 || mealsPerDay.value > 0 || maxDistanceKm.value > 0 || preferNearby.value != null || avoidNightTime.value != null || requireFoodPoints.value != null || startLatitude.value != 0.0 || startLongitude.value != 0.0
         ) {
-            ShowResultCard(
-                startTime.value,
-                endTime.value,
-                foodTime.value,
-                restaurant.value,
-                fastFoodTime.value,
-                cafeTime.value,
-                barTime.value,
-                tourismTime.value,
-                tourism.value,
-                artTime.value,
-                art.value,
-                leisureTime.value,
-                shoppingTime.value,
-                mealsPerDay.value,
-                maxDistanceKm.value,
-                preferNearby.value,
-                avoidNightTime.value,
-                requireFoodPoints.value
+            Column {
+                ShowResultCard(
+                    startTime.value,
+                    endTime.value,
+                    foodTime.value,
+                    restaurant.value,
+                    fastFoodTime.value,
+                    cafeTime.value,
+                    barTime.value,
+                    tourismTime.value,
+                    tourism.value,
+                    artTime.value,
+                    art.value,
+                    leisureTime.value,
+                    shoppingTime.value,
+                    mealsPerDay.value,
+                    startLatitude.value,
+                    startLongitude.value,
+                    maxDistanceKm.value,
+                    preferNearby.value,
+                    avoidNightTime.value,
+                    requireFoodPoints.value,
 
-            )
+                    )
+                Button(
+                    {
+                        saveTravel(
+                            UserPreferences(
+                                startDate = startTime.value,
+                                endDate = endTime.value,
+                                foodTime = foodTime.value.toInt(),
+                                restaurant = restaurant.value.toInt(),
+                                fastFoodTime = fastFoodTime.value.toInt(),
+                                cafeTime = cafeTime.value.toInt(),
+                                barTime = barTime.value.toInt(),
+                                tourismTime = tourismTime.value.toInt(),
+                                tourism = tourism.value.toInt(),
+                                artTime = artTime.value.toInt(),
+                                art = art.value.toInt(),
+                                leisureTime = leisureTime.value.toInt(),
+                                shoppingTime = shoppingTime.value.toInt(),
+                                mealsPerDay = mealsPerDay.value.toInt(),
+                                maxDistanceKm = maxDistanceKm.value.toDouble(),
+                                preferNearby = preferNearby.value ?: false,
+                                avoidNightTime = avoidNightTime.value ?: false,
+                                requireFoodPoints = requireFoodPoints.value ?: false,
+                                startLatitude = startLatitude.value,
+                                startLongitude = startLongitude.value
+
+                            )
+                        )
+                    }, modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Text("Создать марштрут")
+                }
+            }
         }
     }
 }
@@ -268,10 +312,61 @@ private fun SelectDate(title: String, selectDate: (String) -> Unit) {
             }
 
         ) {
-            androidx.compose.material3.DatePicker(datePickerState)
+            DatePicker(datePickerState)
         }
     }
 }
+
+@Composable
+fun MyPlaceRequest(lat:Double,lot:Double,takeCoordinates:(Double, Double)->Unit) {
+
+    val context = LocalContext.current
+    val fusedLocationClient = remember {
+        LocationServices.getFusedLocationProviderClient(context)
+    }
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            getLocation(fusedLocationClient) { lat, lon ->
+                takeCoordinates(lat,lon)
+            }
+        } else {
+            Toast.makeText(context,"Разрешение отклонено", Toast.LENGTH_SHORT).show()
+        }
+    }
+    FilterChip(
+        label = { Text("Мое местоположение") },
+        selected = lat != 0.0,
+        onClick = {
+            val permission = Manifest.permission.ACCESS_FINE_LOCATION
+            when {
+                ContextCompat.checkSelfPermission(context, permission)
+                        == PackageManager.PERMISSION_GRANTED -> {
+                    // Разрешение уже есть
+                    getLocation(fusedLocationClient) { lat, lon ->
+                        takeCoordinates(lat,lon)
+                    }
+                }
+                else -> permissionLauncher.launch(permission)
+
+            }
+        }
+    )
+}
+@SuppressLint("MissingPermission")
+private fun getLocation(
+    fusedLocationClient: FusedLocationProviderClient,
+    onLocationReady: (Double, Double) -> Unit
+) {
+    fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+        if (location != null) {
+            onLocationReady(location.latitude, location.longitude)
+        }
+    }
+}
+
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -353,8 +448,8 @@ fun ShowResultCard(
     leisureTime: Float,
     shoppingTime: Float,
     mealsPerDay: Float,
-//    startLatitude: Float,
-//    startLongitude:Float,
+    startLatitude: Double,
+    startLongitude: Double,
     maxDistanceKm: Float,
     preferNearby: Boolean?,
     avoidNightTime: Boolean?,
@@ -379,6 +474,7 @@ fun ShowResultCard(
                 TextForCard("Время на искусство", value = artTime.toInt().toString())
                 TextForCard("Искусство", value = art.toInt().toString())
                 TextForCard("Время на досуг", value = leisureTime.toInt().toString())
+                TextForCard("Мое местоположение", value = "${startLatitude}, $startLongitude")
                 TextForCard("Время на покупки", value = shoppingTime.toInt().toString())
                 TextForCard("Приёмов пищи в день", value = mealsPerDay.toInt().toString())
                 TextForCard("Максимальная дистанция", value = maxDistanceKm.toInt().toString())
@@ -387,21 +483,42 @@ fun ShowResultCard(
                 TextForCard("Точки питания", value = requireFoodPoints.toString())
             }
         }
-        Button(
-            {}, modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(16.dp)
-        ) {
-            Text("Создать марштрут")
-        }
 
     }
-
 }
+
+data class UserPreferences(
+    val startDate: String,
+    val endDate: String,
+    val foodTime: Int = 0,
+    val restaurant: Int = 0,
+    val fastFoodTime: Int = 0,
+    val cafeTime: Int = 0,
+    val barTime: Int = 0,
+    val tourismTime: Int = 0,
+    val tourism: Int = 0,
+    val artTime: Int = 0,
+    val art: Int = 0,
+    val leisureTime: Int = 0,
+    val shoppingTime: Int = 0,
+    val mealsPerDay: Int = 3,
+    val startLatitude: Double=0.0,
+    val startLongitude: Double = 0.0,
+    val maxDistanceKm: Double = 50.0,
+    val preferNearby: Boolean = true,
+    val avoidNightTime: Boolean = true,
+    val requireFoodPoints: Boolean = true
+)
 
 
 @Composable
 fun TextForCard(title: String, value: String) {
-    if (value.isNotBlank() && value != "0" && value != "null") {
+    if (value.isNotBlank() && value != "0" && value != "null" && value != "0.0") {
+        val value = when (value) {
+            "true" -> "Да"
+            "false" -> "Нет"
+            else -> value
+        }
         Row {
             Text("$title - ")
             Text(value)
