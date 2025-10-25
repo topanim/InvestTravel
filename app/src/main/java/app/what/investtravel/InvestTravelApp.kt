@@ -1,10 +1,12 @@
 package app.what.investtravel
 
 import android.app.Application
+import androidx.room.Room
 import app.what.foundation.services.AppLogger
 import app.what.foundation.services.AppLogger.Companion.Auditor
 //import app.what.foundation.services.auto_update.GitHubUpdateService
 import app.what.foundation.services.crash.CrashHandler
+import app.what.investtravel.data.local.database.AppDatabase
 import app.what.investtravel.data.local.settings.AppValues
 import app.what.investtravel.data.remote.ApiClient
 import app.what.investtravel.data.remote.AuthService
@@ -72,13 +74,13 @@ val generalModule = module {
     single<OnboardingController> { OnboardingController(get()) }
     single<MainController> { MainController() }
 
-//    single {
-//        Room.databaseBuilder(
-//            androidContext(),
-//            AppDatabase::class.java,
-//            "investtravel.db"
-//        ).build()
-//    }
+    single {
+        Room.databaseBuilder(
+            androidContext(),
+            AppDatabase::class.java,
+            "investtravel.db"
+        ).build()
+    }
 
     single {
         HttpClient(CIO) {

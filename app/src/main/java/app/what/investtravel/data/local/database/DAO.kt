@@ -1,14 +1,20 @@
 package app.what.investtravel.data.local.database
 
+import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import app.what.investtravel.data.local.entity.RouteEntity
 
-//@Dao
-//interface TeachersDAO {
-//    @Insert(onConflict = OnConflictStrategy.IGNORE)
-//    suspend fun insert(teacher: TeacherDBO): Long
-//
+
+@Dao
+interface RoutesDAO {
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insert(teacher: RouteEntity)
+}
+
 //    @Insert(onConflict = OnConflictStrategy.IGNORE)
 //    suspend fun insert(teacher: List<TeacherDBO>)
-//
+
 //    @Update
 //    suspend fun update(teacher: TeacherDBO)
 //

@@ -3,6 +3,7 @@ package app.what.investtravel.data.local.database
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.room.TypeConverter
+import kotlinx.serialization.json.Json
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
@@ -31,4 +32,9 @@ class Converters {
     fun toLocalTime(timeString: String?): LocalTime? {
         return timeString?.let { LocalTime.parse(it, timeFormatter) }
     }
+    @TypeConverter
+    fun fromList(value: List<String>): String = Json.encodeToString(value)
+
+    @TypeConverter
+    fun toList(value: String): List<String> = Json.decodeFromString(value)
 }
