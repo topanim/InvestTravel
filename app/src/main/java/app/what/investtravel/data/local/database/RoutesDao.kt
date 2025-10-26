@@ -1,6 +1,7 @@
 package app.what.investtravel.data.local.database
 
 import androidx.room.Dao
+import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
@@ -12,11 +13,18 @@ import app.what.investtravel.data.local.entity.RouteWithPoints
 @Dao
 interface RoutesDAO {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun insert(teacher: RouteEntity)
-
+    suspend fun insert(route: RouteEntity): Long
+    
     @Transaction
-    @Query("SELECT * FROM routes WHERE routes.id = :id")
-    suspend fun selectRouteById(id: Int): RouteWithPoints
+    @Query("SELECT * FROM routes WHERE routes.localId = :localId")
+    suspend fun selectRouteById(localId: Int): RouteWithPoints?
+    
+    @Transaction
+    @Query("SELECT * FROM routes")
+    suspend fun selectAllRoutes(): List<RouteWithPoints>
+    
+    @Delete
+    suspend fun delete(route: RouteEntity)
 }
 
 //    @Insert(onConflict = OnConflictStrategy.IGNORE)

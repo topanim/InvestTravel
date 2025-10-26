@@ -13,8 +13,8 @@ data class RouteEntity(
     val description: String? = null,
     val startDate: String? = null,
     val endDate: String? = null,
-    val totalDurationHours: Int = 0,
-    val totalDistanceKm: Int = 0,
+    val totalDurationHours: Float = 0f,
+    val totalDistanceKm: Float = 0f,
     val totalObjects: Int = 0,
     val categoriesCovered: String? = null, // JSON
     val routeSummary: String? = null // JSON
@@ -36,7 +36,9 @@ data class RoutePointEntity(
     val durationMinutes: Int = 0,
     val travelTimeMinutes: Int? = 0,
     val description: String? = null,
-    val distanceToNextKm: Int = 0
+    val distanceToNextKm: Float? = null,
+    val imageUrl: String? = null, // URL изображения баннера
+    val checked: Boolean = false // Отметка о посещении
 )
 
 data class RouteWithPoints(

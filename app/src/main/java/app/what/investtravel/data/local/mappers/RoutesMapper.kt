@@ -16,14 +16,13 @@ fun RouteResponse.toEntity(): RouteEntity {
         totalDurationHours = totalDurationHours,
         totalDistanceKm = totalDistanceKm,
         totalObjects = totalObjects,
-        categoriesCovered = Json.encodeToString(categoriesCovered),
-        routeSummary = routeSummary.let { Json.encodeToString(it) }
+        categoriesCovered = Json.encodeToString(categoriesCovered)
     )
 }
-fun List<RoutePointResponse>.toPointEntities(routeId: Int): List<RoutePointEntity> {
+fun List<RoutePointResponse>.toPointEntities(localRouteId: Int): List<RoutePointEntity> {
     return this.map {
         RoutePointEntity(
-            routeId = routeId,
+            routeId = localRouteId,
             order = it.order,
             name = it.name,
             category = it.category,
@@ -36,7 +35,9 @@ fun List<RoutePointResponse>.toPointEntities(routeId: Int): List<RoutePointEntit
             durationMinutes = it.durationMinutes,
             travelTimeMinutes = it.travelTimeMinutes,
             description = it.description,
-            distanceToNextKm = it.distanceToNextKm
+            distanceToNextKm = it.distanceToNextKm,
+            imageUrl = it.imageUrl, // Сохраняем URL изображения
+            checked = false // По умолчанию не посещено
         )
     }
 }

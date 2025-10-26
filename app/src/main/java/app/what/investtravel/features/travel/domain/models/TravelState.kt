@@ -8,7 +8,8 @@ data class TravelState(
     val travelsFetchState: RemoteState = RemoteState.Idle,
     val selectedTravel: Travel? = null,
     val showSheet: Boolean = false,
-    val aiComment: String = ""
+    val aiComment: String = "",
+    val isCreatingRoute: Boolean = false
 )
 
 data class Travel(
@@ -23,7 +24,11 @@ data class TravelObject(
     val name: String,
     val type: String,
     val lat: Double,
-    val lon: Double
-) {
-    var checked by monitored(false)
-}
+    val lon: Double,
+    val address: String? = null,
+    val description: String? = null,
+    val durationMinutes: Int = 0,
+    val arrivalTime: String? = null,
+    val departureTime: String? = null,
+    var checked: Boolean = false
+)

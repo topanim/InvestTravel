@@ -9,6 +9,8 @@ import app.what.investtravel.data.local.settings.AppValues
 import app.what.investtravel.features.auth.navigation.AuthProvider
 import app.what.investtravel.features.auth.navigation.authRegistry
 import app.what.investtravel.features.main.navigation.mainRegistry
+import app.what.investtravel.features.onboarding.navigation.onboardingRegistry
+import app.what.investtravel.ui.theme.AppTheme
 import app.what.navigation.core.NavigationHost
 import app.what.navigation.core.ProvideGlobalDialog
 import app.what.navigation.core.ProvideGlobalSheet
@@ -32,13 +34,13 @@ class MainActivity : ComponentActivity() {
             }
 
             val settings = koinInject<AppValues>()
-
+            settings.authToken.set("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxMywicm9sZV9pZCI6MCwiZXhwIjoxNzYxNzcyNzU4fQ.6GqV4BVDlFIBy34HB6ISy-vnuwxJ7cy0X4aZodvHAHo")
             AppTheme(settings) {
                 ProvideGlobalDialog {
                     ProvideGlobalSheet {
                         NavigationHost(
                             start = AuthProvider
-
+                    
                         ) {
                             mainRegistry()
                             onboardingRegistry()

@@ -233,6 +233,18 @@ fun HotelsListScreen(
             }
         }
 
+        // Карта с отелями
+        HotelsMapView(
+            hotels = hotelsFlow.itemSnapshotList.items,
+            onHotelSelected = onHotelSelected,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(250.dp)
+                .padding(horizontal = 16.dp)
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
         // Баннер геолокации если нет разрешения
         if (!locationPermissionGranted) {
             LocationPermissionBanner(
@@ -1261,4 +1273,61 @@ fun BookingDialog(
             }
         }
     )
+}
+
+// Карта с отображением всех отелей
+@Composable
+fun HotelsMapView(
+    hotels: List<HotelResponse>,
+    onHotelSelected: (HotelResponse) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val mapController = remember { MapKitController() }
+    val context = LocalContext.current
+
+    LaunchedEffect(hotels) {
+        mapController.clear()
+        
+        if (hotels.isNotEmpty()) {
+            // Добавляем плейсмарки для всех отелей
+            hotels.forEach { hotel ->
+                val point = Point(hotel.latitude, hotel.longitude)
+                mapController.createPlacemark(
+                    pos = point,
+                    icon = ImageProvider.fromResource(context, R.drawable.il_green_bush),
+                    text = hotel.name
+                )
+            }
+            
+            // Центрируем карту на первом отеле
+            val firstHotel = hotels.first()
+            mapController.animateMoveTo(
+                pos = Point(firstHotel.latitude, firstHotel.longitude),
+                zoom = 12f
+            )
+        }
+    }
+
+    Box(
+        modifier = modifier
+            .clip(shapes.medium)
+            .background(colorScheme.surfaceVariant)
+    ) {
+        YandexMapKit(controller = mapController)
+        
+        // Заголовок карты
+        Text(
+            text = "Отели на карте (${hotels.size})",
+            style = typography.titleSmall,
+            fontWeight = FontWeight.Medium,
+            color = colorScheme.onSurface,
+            modifier = Modifier
+                .padding(12.dp)
+                .background(
+                    color = colorScheme.surface.copy(alpha = 0.9f),
+                    shape = RoundedCornerShape(8.dp)
+                )
+                .padding(horizontal = 8.dp, vertical = 4.dp)
+        )
+    }
 }
