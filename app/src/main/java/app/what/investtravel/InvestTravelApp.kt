@@ -16,6 +16,7 @@ import app.what.investtravel.data.remote.HotelsService
 import app.what.investtravel.data.remote.RoutesService
 import app.what.investtravel.data.remote.UsersService
 import app.what.investtravel.features.assistant.domain.AssistantController
+import app.what.investtravel.features.auth.domain.AuthController
 import app.what.investtravel.features.dev.presentation.NetworkMonitorPlugin
 import app.what.investtravel.features.hotel.domain.HotelController
 import app.what.investtravel.features.main.domain.MainController
@@ -81,6 +82,7 @@ val generalModule = module {
     single<ProfileController> { ProfileController(get(),get()) }
     single<AssistantController> { AssistantController() }
     single<TravelController> { TravelController() }
+    single<AuthController> { AuthController() }
     single<SettingsController> { SettingsController(get(), get()) }
     single<OnboardingController> { OnboardingController(get()) }
     single<MainController> { MainController() }

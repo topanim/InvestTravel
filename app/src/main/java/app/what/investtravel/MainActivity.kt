@@ -5,23 +5,24 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.ui.Modifier
 import app.what.investtravel.data.local.settings.AppValues
-import app.what.investtravel.features.main.navigation.MainProvider
+import app.what.investtravel.features.auth.navigation.AuthProvider
+import app.what.investtravel.features.auth.navigation.authRegistry
 import app.what.investtravel.features.main.navigation.mainRegistry
 import app.what.navigation.core.NavigationHost
 import app.what.navigation.core.ProvideGlobalDialog
 import app.what.navigation.core.ProvideGlobalSheet
-import app.what.investtravel.features.onboarding.navigation.OnboardingProvider
 import app.what.investtravel.features.onboarding.navigation.onboardingRegistry
 import app.what.investtravel.ui.theme.AppTheme
+import app.what.navigation.core.NavProvider
 import com.yandex.mapkit.MapKitFactory
 import org.koin.compose.koinInject
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // ЭТО ОСНОВНАЯ АКТИВНОСТЬ ПРИЛОЖЕНИЯ
 
         enableEdgeToEdge()
         setContent {
@@ -36,11 +37,12 @@ class MainActivity : ComponentActivity() {
                 ProvideGlobalDialog {
                     ProvideGlobalSheet {
                         NavigationHost(
-                            start =// if (settings.isFirstLaunch.get()!!) OnboardingProvider
-                             MainProvider
+                            start = AuthProvider
+
                         ) {
                             mainRegistry()
                             onboardingRegistry()
+                            authRegistry()
                         }
                     }
                 }
