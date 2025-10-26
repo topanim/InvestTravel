@@ -37,9 +37,12 @@ data class HotelResponse(
 
 @Serializable
 enum class HotelStatus {
-    @SerialName("active") ACTIVE,
-    @SerialName("inactive") INACTIVE,
-    @SerialName("maintenance") MAINTENANCE
+    @SerialName("active")
+    ACTIVE,
+    @SerialName("inactive")
+    INACTIVE,
+    @SerialName("maintenance")
+    MAINTENANCE
 }
 
 // Booking Models
@@ -72,10 +75,14 @@ data class HotelBookingResponse(
 
 @Serializable
 enum class BookingStatus {
-    @SerialName("pending") PENDING,
-    @SerialName("confirmed") CONFIRMED,
-    @SerialName("cancelled") CANCELLED,
-    @SerialName("completed") COMPLETED
+    @SerialName("pending")
+    PENDING,
+    @SerialName("confirmed")
+    CONFIRMED,
+    @SerialName("cancelled")
+    CANCELLED,
+    @SerialName("completed")
+    COMPLETED
 }
 
 // Payment Models
@@ -107,11 +114,16 @@ data class HotelPaymentResponse(
 
 @Serializable
 enum class PaymentStatus {
-    @SerialName("pending") PENDING,
-    @SerialName("completed") COMPLETED,
-    @SerialName("failed") FAILED,
-    @SerialName("cancelled") CANCELLED,
-    @SerialName("refunded") REFUNDED
+    @SerialName("pending")
+    PENDING,
+    @SerialName("completed")
+    COMPLETED,
+    @SerialName("failed")
+    FAILED,
+    @SerialName("cancelled")
+    CANCELLED,
+    @SerialName("refunded")
+    REFUNDED
 }
 
 // User Bookings & Payments Responses
@@ -228,12 +240,11 @@ data class RouteResponse(
     @SerialName("description") val description: String?,
     @SerialName("start_date") val startDate: String,
     @SerialName("end_date") val endDate: String,
-    @SerialName("total_duration_hours") val totalDurationHours: Int,
-    @SerialName("total_distance_km") val totalDistanceKm: Int,
+    @SerialName("total_duration_hours") val totalDurationHours: Float,
+    @SerialName("total_distance_km") val totalDistanceKm: Float,
     @SerialName("total_objects") val totalObjects: Int,
     @SerialName("categories_covered") val categoriesCovered: List<String>,
     @SerialName("points") val points: List<RoutePointResponse>,
-    @SerialName("route_summary") val routeSummary: Map<String, String> // TODO: Map<String, Any>
 )
 
 @Serializable
@@ -250,7 +261,8 @@ data class RoutePointResponse(
     @SerialName("duration_minutes") val durationMinutes: Int,
     @SerialName("travel_time_minutes") val travelTimeMinutes: Int?,
     @SerialName("description") val description: String?,
-    @SerialName("distance_to_next_km") val distanceToNextKm: Int
+    @SerialName("distance_to_next_km") val distanceToNextKm: Float?,
+    @SerialName("image_url") val imageUrl: String? = null
 )
 
 @Serializable
@@ -282,12 +294,30 @@ data class ValidationError(
     @SerialName("msg") val message: String,
     @SerialName("type") val type: String
 )
+
 @Serializable
 data class GenerateCommentRequest(
     @SerialName("text") val text: String
 )
+
 @Serializable
 data class GenerateCommentResponse(
     @SerialName("comment") val comment: String,
     @SerialName("success") val success: Boolean,
+)
+
+@Serializable
+data class AiRouteRequest(
+    @SerialName("user_preferences") val userPreferences: String,
+    @SerialName("trip_duration_hours") val tripDurationHours: Int,
+    @SerialName("start_date") val startDate: String,
+    @SerialName("end_date") val endDate: String
+)
+
+@Serializable
+data class AiRouteResponse(
+    @SerialName("success") val success: Boolean,
+    @SerialName("route") val route: RouteResponse,
+    @SerialName("ai_recommendations") val aiRecommendations: String?,
+    @SerialName("error_message") val errorMessage: String?
 )

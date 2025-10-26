@@ -328,7 +328,17 @@ class AiService(
     suspend fun generateComment(data: GenerateCommentRequest): Result<GenerateCommentResponse>{
         return apiClient.safeRequest {
             post("ai/ai/generate-comment") {
-                parameter("token", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxMywicm9sZV9pZCI6MCwiZXhwIjoxNzYxNzcyNzU4fQ.6GqV4BVDlFIBy34HB6ISy-vnuwxJ7cy0X4aZodvHAHo")
+                parameter("token", appValues.authToken.get())
+                contentType(ContentType.Application.Json)
+                setBody(data)
+            }.body()
+        }
+    }
+    
+    suspend fun generateAiRoute(data: AiRouteRequest): Result<AiRouteResponse> {
+        return apiClient.safeRequest {
+            post("/ai-route/generate") {
+                parameter("token", appValues.authToken.get())
                 contentType(ContentType.Application.Json)
                 setBody(data)
             }.body()

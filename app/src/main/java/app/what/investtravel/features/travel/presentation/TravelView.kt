@@ -1,7 +1,6 @@
 package app.what.investtravel.features.travel.presentation
 
 import android.annotation.SuppressLint
-import android.graphics.drawable.Icon
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,10 +15,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -38,15 +39,20 @@ import androidx.compose.material3.MaterialTheme.shapes
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -61,6 +67,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.what.foundation.core.Listener
 import app.what.foundation.ui.Gap
+import app.what.foundation.ui.SegmentTab
 import app.what.foundation.ui.VerticalGap
 import app.what.foundation.ui.bclick
 import app.what.foundation.ui.controllers.rememberSheetController
@@ -86,6 +93,9 @@ fun TravelView(
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     val sheetState = rememberSheetController()
+    
+    // Состояние выбора транспорта
+    var selectedTransport by remember { mutableStateOf("driving") }
 
     LaunchedEffect(drawerState.currentValue) {
         NavBarController.setVisibility(drawerState.isClosed)
@@ -110,6 +120,42 @@ fun TravelView(
                     modifier = Modifier.fillMaxSize()
                 )
 
+                // Сегмент выбора транспорта
+                Card(
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .align(Alignment.TopCenter),
+                    colors = CardDefaults.cardColors(containerColor = colorScheme.surface.copy(alpha = 0.9f)),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                ) {
+                    SingleChoiceSegmentedButtonRow(
+                        modifier = Modifier.padding(8.dp)
+                    ) {
+                        SegmentTab(
+                            selected = selectedTransport == "driving",
+                            onClick = { 
+                                selectedTransport = "driving"
+                                // Обновляем маршрут при смене транспорта
+                                state.value.selectedTravel?.let { travel ->
+                                    listener(TravelEvent.TravelSelected(travel, "driving"))
+                                }
+                            },
+                            icon = Icons.Default.Search, index = 0, count = 2, label = "Машина"
+                        )
+                        SegmentTab(
+                            selected = selectedTransport == "walking",
+                            onClick = { 
+                                selectedTransport = "walking"
+                                // Обновляем маршрут при смене транспорта
+                                state.value.selectedTravel?.let { travel ->
+                                    listener(TravelEvent.TravelSelected(travel, "walking"))
+                                }
+                            },
+                            icon = Icons.Default.Delete, index = 1, count = 2, label = "Пешком"
+                        )
+                    }
+                }
+
                 // Кнопка открытия drawer
                 FloatingActionButton(
                     onClick = {
@@ -133,7 +179,7 @@ fun TravelView(
 
         }
     )
-    if(!sheetState.opened){
+    if (!sheetState.opened) {
         sheetState.close()
         listener.invoke(TravelEvent.ShowSheet)
     }
@@ -168,15 +214,12 @@ fun AiCommentLayout(comment: String) {
                     },
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Row() {
-                        Icon(
-                            Icons.Default.PlayArrow, "",
-                            modifier = Modifier.size(40.dp)
-                        )
-                        Gap(10)
-                        Text("Прослушать", fontSize = 30.sp)
-                    }
-
+                    Icon(
+                        Icons.Default.PlayArrow, "",
+                        modifier = Modifier.size(40.dp)
+                    )
+                    Gap(10)
+                    Text("Прослушать", fontSize = 30.sp)
                 }
             }
             item {
@@ -191,7 +234,7 @@ fun AiCommentLayout(comment: String) {
 
 @SuppressLint("DefaultLocale")
 @Composable
-fun TravelItem(item: Travel, onClick: () -> Unit) {
+fun TravelItem(item: Travel, onClick: () -> Unit, onDelete: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -304,6 +347,21 @@ fun TravelItem(item: Travel, onClick: () -> Unit) {
                     }
                 }
 
+                // Кнопка удаления
+                IconButton(
+                    onClick = { onDelete() },
+                    modifier = Modifier.size(32.dp)
+                ) {
+                    Icon(
+                        Icons.Default.Delete,
+                        contentDescription = "Delete route",
+                        tint = colorScheme.error,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+
+                Gap(8)
+
                 // Стрелка перехода
                 Icon(
                     Icons.Default.KeyboardArrowDown,
@@ -330,14 +388,19 @@ fun TravelItem(item: Travel, onClick: () -> Unit) {
 
 @SuppressLint("DefaultLocale")
 @Composable
-fun TravelObjectItem(item: TravelObject, setToAi: () -> Unit) {
+fun TravelObjectItem(item: TravelObject, setToAi: () -> Unit, onCheckedChange: (Boolean) -> Unit = {}) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp),
         shape = shapes.medium,
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        colors = CardDefaults.cardColors(containerColor = colorScheme.surfaceContainer)
+        colors = CardDefaults.cardColors(
+            containerColor = if (item.checked) 
+                colorScheme.surfaceContainer.copy(alpha = 0.5f) 
+            else 
+                colorScheme.surfaceContainer
+        )
     ) {
         Column {
             // Баннер
@@ -392,7 +455,10 @@ fun TravelObjectItem(item: TravelObject, setToAi: () -> Unit) {
             ) {
                 Checkbox(
                     checked = item.checked,
-                    onCheckedChange = { item.checked = it },
+                    onCheckedChange = { 
+                        item.checked = it
+                        onCheckedChange(it)
+                    },
                     colors = CheckboxDefaults.colors(
                         checkedColor = colorScheme.primary,
                         uncheckedColor = colorScheme.outline
@@ -416,25 +482,33 @@ fun TravelObjectItem(item: TravelObject, setToAi: () -> Unit) {
                     VerticalGap(4)
 
                     // Дополнительная информация
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            Icons.Default.Menu,
-                            contentDescription = null,
-                            tint = colorScheme.secondary,
-                            modifier = Modifier.size(14.dp)
-                        )
-                        VerticalGap(4)
+                    if (!item.address.isNullOrEmpty()) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                Icons.Default.Menu,
+                                contentDescription = null,
+                                tint = colorScheme.secondary,
+                                modifier = Modifier.size(14.dp)
+                            )
+                            VerticalGap(4)
+                            Text(
+                                item.address,
+                                style = typography.bodySmall,
+                                color = colorScheme.secondary,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
+                    }
+                    
+                    if (item.durationMinutes > 0) {
+                        VerticalGap(2)
                         Text(
-                            "${String.format("%.4f", item.lat)}, ${
-                                String.format(
-                                    "%.4f",
-                                    item.lon
-                                )
-                            }",
+                            "Продолжительность: ${item.durationMinutes} мин",
                             style = typography.bodySmall,
-                            color = colorScheme.secondary
+                            color = colorScheme.tertiary
                         )
                     }
                 }

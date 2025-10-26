@@ -41,6 +41,7 @@ fun RowScope.SegmentTab(
     else colorScheme.onSecondaryContainer
 
     Row(
+        verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(4.dp),
         modifier = Modifier.padding(10.dp, 8.dp)
     ) {

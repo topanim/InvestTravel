@@ -1,17 +1,22 @@
 package app.what.investtravel.features.assistant.domain
 
+import android.util.Log
 import androidx.lifecycle.viewModelScope
 import app.what.foundation.core.UIController
-import app.what.foundation.utils.suspendCall
+import app.what.investtravel.data.remote.AiService
+import app.what.investtravel.data.remote.GenerateCommentRequest
 import app.what.investtravel.features.assistant.domain.models.AssistantAction
 import app.what.investtravel.features.assistant.domain.models.AssistantEvent
 import app.what.investtravel.features.assistant.domain.models.AssistantState
 import app.what.investtravel.features.assistant.domain.models.Message
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import org.koin.java.KoinJavaComponent.inject
 
 class AssistantController : UIController<AssistantState, AssistantAction, AssistantEvent>(
     AssistantState()
 ) {
+    val aiService: AiService by inject(AiService::class.java)
     override fun obtainEvent(viewEvent: AssistantEvent) = when (viewEvent) {
         AssistantEvent.Init -> init()
         AssistantEvent.OnStartChattingClicked -> startChatting()
@@ -44,29 +49,44 @@ class AssistantController : UIController<AssistantState, AssistantAction, Assist
             )
         }
 
-        suspendCall(viewModelScope) {
-            delay(2000L)
-            // TODO: Код запроса
-            val questionResult = listOf(
-                "Армянский адвокат понял, что дело не из простых, после того как судья пятый раз обыграл его в нарды",
-                "На выборах в Национальное Собрание Армении большинство мест получила партия в нарды",
-                "Получив второй раз с орбиты на день рождения чётки и нарды, мальчик начал подозревать, что его папа вовсе не космонавт",
-                "Выслал Бог Адама и Еву на землю, а там под деревом сидят армяне в нарды играют.\n" +
-                        "Адам спрашивает:\n" +
-                        "— Бог, кто это?\n" +
-                        "Бог отвечает:\n" +
-                        "— Не знаю, они до меня здесь были…",
-
-                ).random()
-            val newMessage =
-                if (questionResult != "") Message(authorIsMe = false, content = questionResult)
-                else Message(authorIsMe = false, content = "Произошла ошибка, попробуйте еще раз")
-
-            safeUpdateState {
-                copy(
-                    messages = messages + newMessage,
-                    isAiThinking = false
-                )
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                aiService.generateComment(GenerateCommentRequest(message))
+                    .onSuccess { response ->
+                        Log.d("AssistantController", "AI response received: ${response.comment}")
+                        safeUpdateState {
+                            copy(
+                                messages = messages + Message(
+                                    authorIsMe = false,
+                                    content = response.comment
+                                ),
+                                isAiThinking = false
+                            )
+                        }
+                    }
+                    .onFailure { error ->
+                        Log.e("AssistantController", "Error generating AI response", error)
+                        safeUpdateState {
+                            copy(
+                                messages = messages + Message(
+                                    authorIsMe = false,
+                                    content = "Извините, произошла ошибка. Попробуйте еще раз."
+                                ),
+                                isAiThinking = false
+                            )
+                        }
+                    }
+            } catch (e: Exception) {
+                Log.e("AssistantController", "Exception generating AI response", e)
+                safeUpdateState {
+                    copy(
+                        messages = messages + Message(
+                            authorIsMe = false,
+                            content = "Произошла ошибка при обработке запроса. Попробуйте еще раз."
+                        ),
+                        isAiThinking = false
+                    )
+                }
             }
         }
     }

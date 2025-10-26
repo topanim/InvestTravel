@@ -28,6 +28,8 @@ import app.what.investtravel.libs.GoogleDriveParser
 import app.what.investtravel.utils.AppUtils
 import com.google.android.gms.location.LocationServices
 import com.yandex.mapkit.MapKitFactory
+import com.yandex.runtime.image.ImageProvider
+import com.yandex.runtime.image.ResourceImageProvider
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.HttpTimeout
@@ -80,7 +82,7 @@ val generalModule = module {
     single<HotelController> { HotelController(get(), get(), get(), get()) }
     single<ProfileController> { ProfileController(get(),get()) }
     single<AssistantController> { AssistantController() }
-    single<TravelController> { TravelController() }
+    single<TravelController> { TravelController { ImageProvider.fromResource(androidContext(), it) } }
     single<SettingsController> { SettingsController(get(), get()) }
     single<OnboardingController> { OnboardingController(get()) }
     single<MainController> { MainController() }
@@ -92,6 +94,9 @@ val generalModule = module {
             "investtravel.db"
         ).build()
     }
+    
+    single { get<AppDatabase>().routesDao() }
+    single { get<AppDatabase>().routePointsDao() }
 
     single {
         HttpClient(CIO) {

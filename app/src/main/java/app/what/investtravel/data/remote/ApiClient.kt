@@ -14,8 +14,13 @@ class ApiClient(
 
     suspend fun <T> safeRequest(block: suspend HttpClient.() -> T): Result<T> {
         return try {
-            Result.success(client.block())
+            android.util.Log.d("ApiClient", "Making API request")
+            val result = client.block()
+            android.util.Log.d("ApiClient", "API request successful")
+            Result.success(result)
         } catch (e: Exception) {
+            android.util.Log.e("ApiClient", "API request failed", e)
+            e.printStackTrace()
             Result.failure(e)
         }
     }

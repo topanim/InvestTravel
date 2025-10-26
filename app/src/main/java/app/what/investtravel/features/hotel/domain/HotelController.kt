@@ -33,16 +33,15 @@ class HotelController(
 ) : UIController<HotelState, HotelAction, HotelEvent>(
     HotelState()
 ) {
-    init {
-        settings.authToken.set("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxMywicm9sZV9pZCI6MCwiZXhwIjoxNzYxNzcyNzU4fQ.6GqV4BVDlFIBy34HB6ISy-vnuwxJ7cy0X4aZodvHAHo")
-    }
-
     override fun obtainEvent(viewEvent: HotelEvent) = when (viewEvent) {
         HotelEvent.Init -> fetchHotels()
         is HotelEvent.HotelSelected -> {}
         HotelEvent.LoadNextPage -> {}
         HotelEvent.Refresh -> fetchHotels()
-        is HotelEvent.UpdateFilters -> updateState { copy(filters = viewEvent.filters) }
+        is HotelEvent.UpdateFilters -> {
+            updateState { copy(filters = viewEvent.filters) }
+            fetchHotels() // Обновляем отели с новыми фильтрами
+        }
     }
 
     fun fetchHotels() {
