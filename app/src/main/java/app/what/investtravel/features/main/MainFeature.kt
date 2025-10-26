@@ -15,7 +15,6 @@ import androidx.compose.ui.Modifier
 import app.what.foundation.core.Feature
 import app.what.foundation.core.Monitor.Companion.monitored
 import app.what.foundation.ui.animations.AnimatedEnter
-import app.what.foundation.ui.theme.WHATTheme
 import app.what.investtravel.data.local.settings.AppValues
 import app.what.investtravel.features.assistant.navigation.AssistantProvider
 import app.what.investtravel.features.assistant.navigation.assistantRegistry

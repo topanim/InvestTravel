@@ -1,6 +1,5 @@
 package app.what.investtravel
 
-//import app.what.foundation.services.auto_update.GitHubUpdateService
 import android.app.Application
 import android.location.Geocoder
 import androidx.room.Room
@@ -16,6 +15,7 @@ import app.what.investtravel.data.remote.HotelsService
 import app.what.investtravel.data.remote.RoutesService
 import app.what.investtravel.data.remote.UsersService
 import app.what.investtravel.features.assistant.domain.AssistantController
+import app.what.investtravel.features.auth.domain.AuthController
 import app.what.investtravel.features.dev.presentation.NetworkMonitorPlugin
 import app.what.investtravel.features.hotel.domain.HotelController
 import app.what.investtravel.features.main.domain.MainController
@@ -82,7 +82,8 @@ val generalModule = module {
     single<HotelController> { HotelController(get(), get(), get(), get()) }
     single<ProfileController> { ProfileController(get(),get()) }
     single<AssistantController> { AssistantController() }
-    single<TravelController> { TravelController { ImageProvider.fromResource(androidContext(), it) } }
+    single<AuthController> { AuthController() }
+    single<TravelController> { TravelController { ImageProvider.fromRes>>>>>>> f2f3a123096817da19d579ee2d2d54618e9af7c7
     single<SettingsController> { SettingsController(get(), get()) }
     single<OnboardingController> { OnboardingController(get()) }
     single<MainController> { MainController() }
