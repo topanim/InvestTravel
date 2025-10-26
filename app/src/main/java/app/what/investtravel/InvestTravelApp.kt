@@ -82,8 +82,8 @@ val generalModule = module {
     single<HotelController> { HotelController(get(), get(), get(), get()) }
     single<ProfileController> { ProfileController(get(),get()) }
     single<AssistantController> { AssistantController() }
-    single<AuthController> { AuthController() }
-    single<TravelController> { TravelController { ImageProvider.fromRes>>>>>>> f2f3a123096817da19d579ee2d2d54618e9af7c7
+    single<AuthController> { AuthController(get(), get(), get()) }
+    single<TravelController> { TravelController { ImageProvider.fromResource(androidContext(), it) } }
     single<SettingsController> { SettingsController(get(), get()) }
     single<OnboardingController> { OnboardingController(get()) }
     single<MainController> { MainController() }

@@ -1,5 +1,7 @@
 package app.what.investtravel.features.travel.domain
 
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
@@ -64,6 +66,53 @@ class TravelController(
         else -> {}
     }
 
+    private fun handleRouteSuccess(
+        route: Any?,
+        routePoints: List<Point>,
+        transportType: String,
+        value: Travel
+    ) {
+        try {
+            Log.d(
+                "TravelController",
+                "Route created successfully on selection with transport: $transportType"
+            )
+
+            // Рассчитываем расстояние и время одинаково для всех типов транспорта
+            val calculatedDistance =
+                MapKitController.calculateDirectDistance(routePoints) / 1000 // в км
+            val calculatedTime = MapKitController.calculateTimeByTransport(
+                calculatedDistance * 1000,
+                when (transportType) {
+                    "walking" -> "walking"
+                    "bicycle" -> "bicycle"
+                    else -> "car"
+                }
+            ) / 60 // в часах
+
+            Log.d(
+                "TravelController",
+                "Calculated distance: $calculatedDistance km, time: $calculatedTime hours"
+            )
+
+            // Обновляем состояние с рассчитанными значениями
+            updateState {
+                copy(
+                    selectedTravel = value.copy(
+                        distance = calculatedDistance,
+                        time = calculatedTime
+                    )
+                )
+            }
+
+            // Камера перейдет к началу маршрута
+            val firstPoint = routePoints.first()
+            mapController.animateMoveTo(firstPoint, zoom = 13f)
+        } catch (e: Exception) {
+            Log.e("TravelController", "Error in handleRouteSuccess", e)
+        }
+    }
+
     private fun selectTravel(value: Travel, transportType: String = "driving") {
         updateState { copy(selectedTravel = value) }
 
@@ -84,17 +133,11 @@ class TravelController(
                     strokeColor1 = strokeColor
                 )
 
-                val label = when (index) {
-                    0 -> "СТАРТ"
-                    value.objects.lastIndex -> "ФИНИШ"
-                    else -> "Точка ${index + 1}"
-                }
-
                 // Добавляем подпись с названием объекта
                 mapController.createPlacemark(
                     Point(obj.lat, obj.lon),
-                    getImageProvider(R.drawable.ic_launcher_foreground),
-                    "${obj.name}\n${label}"
+                    getImageProvider(R.drawable.il_green_bush),
+                    obj.name
                 )
             }
 
@@ -103,7 +146,25 @@ class TravelController(
 
             if (routePoints.isNotEmpty()) {
                 try {
-                    mapController.createRoute(
+                    // Добавляем метки на все точки маршрута
+                    routePoints.forEachIndexed { index, point ->
+                        val color = when (index) {
+                            0 -> Color(0xFF4CAF50).toArgb() // Зеленый - старт
+                            routePoints.lastIndex -> Color(0xFFF44336).toArgb() // Красный - финиш
+                            else -> Color(0xFF2196F3).toArgb() // Синий - промежуточные
+                        }
+
+                        val strokeColor1 = when (index) {
+                            0 -> Color(0xFF2E7D32).toArgb()
+                            routePoints.lastIndex -> Color(0xFFC62828).toArgb()
+                            else -> Color(0xFF1565C0).toArgb()
+                        }
+
+                        mapController.createCircle(point, radius = 20f, color = color, strokeColor1 = strokeColor1)
+                        mapController.createPlacemark()
+                    }
+
+                    if (false) mapController.createRoute(
                         points = routePoints,
                         vehicleType = when (transportType) {
                             "walking" -> "walking"
@@ -111,48 +172,32 @@ class TravelController(
                             else -> "car"
                         },
                         onFailure = { error ->
-                            Log.e(
-                                "TravelController",
-                                "Error creating route on selection",
-                                Exception()
-                            )
-                        },
-                        onSuccess = { route ->
-                            Log.d(
-                                "TravelController",
-                                "Route created successfully on selection with transport: $transportType"
-                            )
-
-                            // Рассчитываем расстояние и время одинаково для всех типов транспорта
-                            val calculatedDistance =
-                                MapKitController.calculateDirectDistance(routePoints) / 1000 // в км
-                            val calculatedTime = MapKitController.calculateTimeByTransport(
-                                calculatedDistance * 1000,
-                                when (transportType) {
-                                    "walking" -> "walking"
-                                    "bicycle" -> "bicycle"
-                                    else -> "car"
-                                }
-                            ) / 60 // в часах
-
-                            Log.d(
-                                "TravelController",
-                                "Calculated distance: $calculatedDistance km, time: $calculatedTime hours"
-                            )
-
-                            // Обновляем состояние с рассчитанными значениями
-                            updateState {
-                                copy(
-                                    selectedTravel = value.copy(
-                                        distance = calculatedDistance,
-                                        time = calculatedTime
+                            // Убеждаемся, что обработка идет на главном потоке
+                            if (Looper.getMainLooper() != Looper.myLooper()) {
+                                Handler(Looper.getMainLooper()).post {
+                                    Log.e(
+                                        "TravelController",
+                                        "Error creating route on selection: $error",
+                                        Exception()
                                     )
+                                }
+                            } else {
+                                Log.e(
+                                    "TravelController",
+                                    "Error creating route on selection: $error",
+                                    Exception()
                                 )
                             }
-
-                            // Камера перейдет к началу маршрута
-                            val firstPoint = routePoints.first()
-                            mapController.animateMoveTo(firstPoint, zoom = 13f)
+                        },
+                        onSuccess = { route ->
+                            // Убеждаемся, что обработка идет на главном потоке
+                            if (Looper.getMainLooper() != Looper.myLooper()) {
+                                Handler(Looper.getMainLooper()).post {
+                                    handleRouteSuccess(route, routePoints, transportType, value)
+                                }
+                            } else {
+                                handleRouteSuccess(route, routePoints, transportType, value)
+                            }
                         }
                     )
                 } catch (e: Exception) {
@@ -268,18 +313,32 @@ class TravelController(
     ): com.yandex.mapkit.directions.driving.DrivingRoute =
         withContext(Dispatchers.Main) {
             suspendCancellableCoroutine { continuation ->
-                mapController.createRoute(
-                    points = points,
-                    vehicleType = vehicleType,
-                    onFailure = { error ->
-                        Log.e("TravelController", "Error creating map route", Exception())
-                        continuation.resumeWithException(Exception("Failed to create map route: $error"))
-                    },
-                    onSuccess = { route ->
-                        Log.d("TravelController", "Map route created successfully")
-                        continuation.resume(route!!)
-                    }
-                )
+                try {
+                    mapController.createRoute(
+                        points = points,
+                        vehicleType = vehicleType,
+                        onFailure = { error ->
+                            Log.e("TravelController", "Error creating map route: $error")
+                            continuation.resumeWithException(Exception("Failed to create map route: $error"))
+                        },
+                        onSuccess = { route ->
+                            Log.d("TravelController", "Map route created successfully")
+                            if (route != null) {
+                                continuation.resume(route)
+                            } else {
+                                // Для walking/bicycle маршрутов route будет null, это нормально
+                                if (vehicleType == "walking" || vehicleType == "bicycle") {
+                                    continuation.resumeWithException(Exception("Walking/bicycle routes don't return DrivingRoute"))
+                                } else {
+                                    continuation.resumeWithException(Exception("Route is null"))
+                                }
+                            }
+                        }
+                    )
+                } catch (e: Exception) {
+                    Log.e("TravelController", "Exception in createMapRoute", e)
+                    continuation.resumeWithException(e)
+                }
             }
         }
 

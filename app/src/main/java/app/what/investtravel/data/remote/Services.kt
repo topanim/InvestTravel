@@ -160,6 +160,7 @@ class AuthService(
         return apiClient.safeRequest {
             post(ApiClient.BASE_URL + "/auth/login/") {
                 parameter("token", appValues.authToken.get())
+                contentType(ContentType.Application.Json)
                 setBody(loginRequest)
             }.body()
         }
@@ -175,6 +176,7 @@ class UsersService(
         return apiClient.safeRequest {
             post(ApiClient.BASE_URL + "/users/") {
                 parameter("token", appValues.authToken.get())
+                contentType(ContentType.Application.Json)
                 setBody(userCreate)
             }.body()
         }
@@ -198,6 +200,7 @@ class UsersService(
         return apiClient.safeRequest {
             put(ApiClient.BASE_URL + "/users/$userId") {
                 parameter("token", appValues.authToken.get())
+                contentType(ContentType.Application.Json)
                 setBody(userCreate)
             }.body()
         }

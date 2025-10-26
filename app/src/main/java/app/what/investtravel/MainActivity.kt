@@ -34,7 +34,6 @@ class MainActivity : ComponentActivity() {
             }
 
             val settings = koinInject<AppValues>()
-            settings.authToken.set("eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxMywicm9sZV9pZCI6MCwiZXhwIjoxNzYxNzcyNzU4fQ.6GqV4BVDlFIBy34HB6ISy-vnuwxJ7cy0X4aZodvHAHo")
             AppTheme(settings) {
                 ProvideGlobalDialog {
                     ProvideGlobalSheet {
