@@ -213,7 +213,7 @@ class UsersService(
 
     suspend fun getCurrentUser(): Result<UserMoreModel> {
         return apiClient.safeRequest {
-            get(ApiClient.BASE_URL + "/users/user/me") {
+            get("/users/user/me") {
                 parameter("token", appValues.authToken.get())
             }.body()
         }

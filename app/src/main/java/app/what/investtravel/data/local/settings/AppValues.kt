@@ -34,6 +34,7 @@ class AppValues(context: Context) {
     }
 
     val authToken = storage.createValue("auth_token", null, String.serializer())
+    val userName = storage.createValue("user_name", "", String.serializer())
     val isFirstLaunch = storage.createValue("is_first_launch", true, Boolean.serializer())
     val themeType = storage.createValue("theme_type", ThemeType.System, ThemeType.serializer())
     val themeStyle = storage.createValue("theme_style", ThemeStyle.Default, ThemeStyle.serializer())

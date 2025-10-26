@@ -78,7 +78,7 @@ val generalModule = module {
     single { LocationServices.getFusedLocationProviderClient(androidContext()) }
 
     single<HotelController> { HotelController(get(), get(), get(), get()) }
-    single<ProfileController> { ProfileController(get()) }
+    single<ProfileController> { ProfileController(get(),get()) }
     single<AssistantController> { AssistantController() }
     single<TravelController> { TravelController() }
     single<SettingsController> { SettingsController(get(), get()) }

@@ -1,5 +1,6 @@
 package app.what.investtravel.features.profile.domain.models
 
-class ProfileState
-
+data class ProfileState(
+    val userName: String = ""
+)
 
