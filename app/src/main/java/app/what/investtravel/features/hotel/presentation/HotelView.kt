@@ -24,7 +24,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
@@ -206,9 +205,11 @@ fun HotelsListScreen(
         locationPermissionGranted = hasLocationPermission(context)
     }
 
-    Column(modifier = Modifier
-        .fillMaxSize()
-        .systemBarsPadding()) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .systemBarsPadding()
+    ) {
         // Хедер с фильтрами
         Row(
             modifier = Modifier
@@ -714,7 +715,7 @@ fun HotelCard(
 
                     // Количество отзывов (заглушка, т.к. нет в модели)
                     Text(
-                        text = "125 отзывов", // Заглушка
+                        text = hotel.googleReviewsCount.toString(), // Заглушка
                         style = typography.labelSmall,
                         color = colorScheme.onPrimaryContainer
                     )
@@ -1287,7 +1288,7 @@ fun HotelsMapView(
 
     LaunchedEffect(hotels) {
         mapController.clear()
-        
+
         if (hotels.isNotEmpty()) {
             // Добавляем плейсмарки для всех отелей
             hotels.forEach { hotel ->
@@ -1298,7 +1299,7 @@ fun HotelsMapView(
                     text = hotel.name
                 )
             }
-            
+
             // Центрируем карту на первом отеле
             val firstHotel = hotels.first()
             mapController.animateMoveTo(
@@ -1314,7 +1315,7 @@ fun HotelsMapView(
             .background(colorScheme.surfaceVariant)
     ) {
         YandexMapKit(controller = mapController)
-        
+
         // Заголовок карты
         Text(
             text = "Отели на карте (${hotels.size})",

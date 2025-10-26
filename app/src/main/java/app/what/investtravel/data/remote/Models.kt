@@ -32,15 +32,18 @@ data class HotelResponse(
     @SerialName("images") val images: List<String>? = null,
     @SerialName("status") val status: String,
     @SerialName("created_at") val createdAt: String,
-    @SerialName("updated_at") val updatedAt: String? = null
+    @SerialName("updated_at") val updatedAt: String? = null,
+    @SerialName("google_reviews_count") val googleReviewsCount: Int? = null
 )
 
 @Serializable
 enum class HotelStatus {
     @SerialName("active")
     ACTIVE,
+
     @SerialName("inactive")
     INACTIVE,
+
     @SerialName("maintenance")
     MAINTENANCE
 }
@@ -77,10 +80,13 @@ data class HotelBookingResponse(
 enum class BookingStatus {
     @SerialName("pending")
     PENDING,
+
     @SerialName("confirmed")
     CONFIRMED,
+
     @SerialName("cancelled")
     CANCELLED,
+
     @SerialName("completed")
     COMPLETED
 }
@@ -116,12 +122,16 @@ data class HotelPaymentResponse(
 enum class PaymentStatus {
     @SerialName("pending")
     PENDING,
+
     @SerialName("completed")
     COMPLETED,
+
     @SerialName("failed")
     FAILED,
+
     @SerialName("cancelled")
     CANCELLED,
+
     @SerialName("refunded")
     REFUNDED
 }
